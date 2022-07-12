@@ -10,6 +10,7 @@ module.exports = {
     return res.status(statusCodeEnum.OK).json(new ResponseBuilder({}));
   }),
 
+  // testtttt
   //@route [POST] /register
   register: asyncHandle(async (req, res, next) => {
     const { username, email, password, displayname } = req.body;
