@@ -11,4 +11,8 @@ module.exports = {
     msgEnum.UNAUTHORIZED,
     statusCodeEnum.UNAUTHORIZED
   ),
+  INVALID_PASSWORD: new ErrorResponse(
+    msgEnum.INVALID_PASSWORD,
+    statusCodeEnum.BAD_REQUEST
+  ),
 };
