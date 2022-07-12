@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const msgEnum = require("../enum/msg.enum");
 const statusCodeEnum = require("../enum/status-code.enum");
 const User = require("../models/User");
+const redisClient = require("../configs/redis");
 
 module.exports = {
   verifyAccessToken: asyncHandle(async (req, res, next) => {

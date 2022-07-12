@@ -8,9 +8,11 @@ const morgan = require("morgan");
 const routes = require("./routes");
 const connectDb = require("./configs/database");
 const chatServer = require("./socket/chatServer");
+const redisClient = require("./configs/redis");
 
 const app = express();
 connectDb();
+redisClient.connect();
 
 app.use(helmet());
 app.use(cors());
@@ -22,7 +24,7 @@ if (process.env.NODE_ENV === "development") {
 }
 routes(app);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 const server = app.listen(port, () => {
   console.log(`Server running at port ${port}`);
