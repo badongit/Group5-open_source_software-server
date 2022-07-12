@@ -1,5 +1,6 @@
 const asyncHandle = require("../middlewares/asyncHandle");
 const statusCodeEnum = require("../enum/status-code.enum");
+const msgEnum = require("../enum/msg.enum");
 const ResponseBuilder = require("../helpers/response-builder");
 const ErrorResponse = require("../helpers/error-response");
 const User = require("../models/User");
@@ -17,7 +18,7 @@ module.exports = {
     if (!(username && email && password && displayname)) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Missing information")
+          .withMessage(msgEnum.MISSING_DATA)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
         );
@@ -27,7 +28,7 @@ module.exports = {
     if (checkEmail) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Email already exists")
+          .withMessage(msgEnum.EXISTS_EMAIL)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
         );
@@ -37,7 +38,7 @@ module.exports = {
     if (checkUsername) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Username already exists")
+          .withMessage(msgEnum.EXISTS_USERNAME)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
         );
@@ -71,7 +72,7 @@ module.exports = {
     if (!username || !password) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Missing information")
+          .withMessage(msgEnum.MISSING_DATA)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
       );
@@ -81,7 +82,7 @@ module.exports = {
     if (!user) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Username or password is incorrect")
+          .withMessage(msgEnum.INCORRECT_INFO)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
       );
@@ -90,7 +91,7 @@ module.exports = {
     if (!user.matchPassword(password)) {
       return res.status(statusCodeEnum.BAD_REQUEST).json(
         new ResponseBuilder()
-          .withMessage("Username or password is incorrect")
+          .withMessage(msgEnum.INCORRECT_INFO)
           .withCode(statusCodeEnum.BAD_REQUEST)
           .build()
       );
