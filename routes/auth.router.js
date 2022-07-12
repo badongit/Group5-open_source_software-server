@@ -1,6 +1,9 @@
 const router = require("express").Router();
-const { index } = require("../controllers/auth.controller");
+const { changeAvatar, logout } = require("../controllers/auth.controller");
+const { verifyAccessToken } = require("../middlewares/auth");
 
-router.get("/", index);
+router.use(verifyAccessToken);
+router.put("/avatar", changeAvatar);
+router.get("/logout", logout);
 
 module.exports = router;

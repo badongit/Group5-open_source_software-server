@@ -11,4 +11,8 @@ module.exports = {
     msgEnum.UNAUTHORIZED,
     statusCodeEnum.UNAUTHORIZED
   ),
+  FILE_MISSING: new ErrorResponse(
+    msgEnum.FILE_MISSING,
+    statusCodeEnum.BAD_REQUEST
+  ),
 };
