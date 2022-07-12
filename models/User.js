@@ -84,7 +84,7 @@ UserSchema.methods.getResetPasswordToken = function () {
     .digest("hex");
 
   this.resetPasswordExpired =
-    Date.now() + +process.env.RESET_TOKEN_EXPIRED * 60 * 1000;
+    Date.now() + +process.env.RESET_TOKEN_EXPIRE * 60 * 1000;
 
   return resetToken;
 };
@@ -97,7 +97,7 @@ UserSchema.methods.signRefreshToken = async function () {
   const refreshToken = jwt.sign(
     { id: this._id },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRED }
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRE }
   );
 
   await redisClient.set(this._id.toString(), refreshToken);
@@ -109,7 +109,7 @@ UserSchema.methods.signAccessToken = function () {
   const accessToken = jwt.sign(
     { id: this._id },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRED }
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRE }
   );
 
   return accessToken;
