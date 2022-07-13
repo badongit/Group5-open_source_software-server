@@ -5,5 +5,5 @@ module.exports = {
   WRONG_PASSWORD: "wrong password",
   UNAUTHORIZED: "unauthorized",
   FORBIDDEN: "forbidden",
-  INVALID_PASSWORD: "Invalid password",
+  INVALID_PASSWORD: "invalid password",
 };

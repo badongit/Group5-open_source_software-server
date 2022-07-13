@@ -1,18 +1,14 @@
 const router = require("express").Router();
-const { getMe, updateProfile, changePassword} = require("../controllers/auth.controller");
+const {
+  getMe,
+  updateProfile,
+  changePassword,
+} = require("../controllers/auth.controller");
 const { verifyAccessToken } = require("../middlewares/auth");
 
-router
-  .route("/profile", verifyAccessToken)
-  .get(verifyAccessToken, authController.getMe)
-  .put(verifyAccessToken, authController.updateProfile);
-
-
 router.use(verifyAccessToken);
-router
-    .get("/profile", getMe)
-    .put(verifyAccessToken, updateProfile);
-
-router.put("/change-password", changePassword);
+router.get("/profile", getMe);
+router.put("/profile", updateProfile);
+router.put("/password", changePassword);
 
 module.exports = router;
