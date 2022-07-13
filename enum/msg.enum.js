@@ -12,4 +12,7 @@ module.exports = {
   FILE_MISSING: "file missing",
   FILE_NOT_SUPPORT: "file type :{type} is not supported",
   INVALID_PASSWORD: "invalid password",
+  INVALID_MAIL: "invalid email",
+  INVALID_TOKEN: "invalid token",
+  PASSWORD_MISSING: "Missing password",
 };
