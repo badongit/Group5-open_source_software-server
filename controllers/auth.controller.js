@@ -140,22 +140,9 @@ module.exports = {
 
   //@route [GET] /auth/profile
   getMe: asyncHandle(async (req, res, next) => {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return next(
-        new ErrorResponse(
-          msgEnum.NOT_FOUND.replace(":{entity}", "User"),
-          statusCodeEnum.NOT_FOUND
-        )
-      );
-    }
-
-    res.status(statusCodeEnum.OK).json({
-      data: {
-        user,
-      },
-    });
+    return res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ user: req.user }).build());
   }),
 
   //@route [PUT] /auth/profile
@@ -177,25 +164,18 @@ module.exports = {
       runValidators: true,
     });
 
-    res.status(statusCodeEnum.OK).json(new ResponseBuilder({ user }));
+    return res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ user }).build());
   }),
 
   //@route [PUT] /auth/password
   changePassword: asyncHandle(async (req, res, next) => {
     const { oldPassword, newPassword } = req.body;
-    const { user } = req;
+    const user = await User.findById(req.user._id).select("+password");
 
-    if (!(oldPassword && newPassword)) {
-      return next(errorEnum.INVALID_PASSWORD);
-    }
-
-    if (oldPassword === newPassword) {
-      return next(
-        new ErrorResponse(
-          "The new password must be different from the current password",
-          400
-        )
-      );
+    if (!(oldPassword && newPassword) || oldPassword === newPassword) {
+      return next(errorEnum.BAD_REQUEST);
     }
 
     if (!user.matchPassword(oldPassword)) {
@@ -205,6 +185,8 @@ module.exports = {
     user.password = newPassword;
     await user.save();
 
-    res.status(statusCodeEnum.OK).json(new ResponseBuilder({ user }));
+    return res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ user }).build());
   }),
 };
