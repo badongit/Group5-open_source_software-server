@@ -112,11 +112,7 @@ module.exports = {
 
     const response = await driveServices.uploadFileToDrive(avatarFile, {
       name: user._id,
-<<<<<<< HEAD
       parents: process.env.DRIVE_AVATAR_PARENTS,
-=======
-      parents: process.env.DRIVE_AVATAR_ID,
->>>>>>> 755ff90bc9f9333fd11722e979767d0f84636318
     });
 
     if (user.avatarId) {
