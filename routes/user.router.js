@@ -1,7 +1,12 @@
 const router = require("express").Router();
-const { getAll, getById, searchUserByDisplayname } = require("../controllers/user.controller");
+const {
+    verifyRefreshToken,
+    verifyAccessToken,
+  } = require("../middlewares/auth");
+  
+const { getAll, getById } = require("../controllers/user.controller");
 
-router.get("/getAll", getAll);
+router.get("/" ,getAll);
 router.get("/getById/:id", getById);
 
 module.exports = router;
