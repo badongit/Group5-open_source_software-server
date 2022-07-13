@@ -11,8 +11,4 @@ module.exports = {
     msgEnum.UNAUTHORIZED,
     statusCodeEnum.UNAUTHORIZED
   ),
-  MISSING_DATA: new ErrorResponse(
-    msgEnum.MISSING_DATA,
-    statusCodeEnum.BAD_REQUEST
-  ),
 };
