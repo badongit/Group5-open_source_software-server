@@ -10,7 +10,7 @@ module.exports.uploadFileToDrive = async function (
       requestBody: {
         name: name || file.name,
         mimeType: mimeType || file.mimetype,
-        parents,
+        parents: [parents],
       },
       media: {
         mimeType: mimeType || file.mimetype,
@@ -56,7 +56,7 @@ module.exports.updateFileInDrive = async function (
       requestBody: {
         name: name || file.name,
         mimeType: mimeType || file.mimetype,
-        parents,
+        parents: [parents],
       },
       media: {
         mimeType: mimeType || file.mimetype,

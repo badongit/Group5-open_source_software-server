@@ -7,6 +7,7 @@ const errorEnum = require("../enum/error.enum");
 const msgEnum = require("../enum/msg.enum");
 const isAllowType = require("../helpers/is-allow-type");
 const driveServices = require("../googledrive/services");
+const redisClient = require("../configs/redis");
 
 module.exports = {
   //@route [POST] /auth/register
@@ -94,7 +95,7 @@ module.exports = {
   //@route [PUT] /auth/avatar
   changeAvatar: asyncHandle(async (req, res, next) => {
     const avatarFile = req.files.avatar;
-    const { user } = req.user;
+    const user = req.user;
 
     if (!avatarFile) {
       return next(errorEnum.FILE_MISSING);
@@ -111,7 +112,7 @@ module.exports = {
 
     const response = await driveServices.uploadFileToDrive(avatarFile, {
       name: user._id,
-      parents: process.env.DRIVE_AVATAR_ID,
+      parents: process.env.DRIVE_AVATAR_PARENTS,
     });
 
     if (user.avatarId) {
