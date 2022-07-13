@@ -11,6 +11,7 @@ module.exports = {
     msgEnum.UNAUTHORIZED,
     statusCodeEnum.UNAUTHORIZED
   ),
+<<<<<<< HEAD
   MISSING_DATA: new ErrorResponse(
     msgEnum.MISSING_DATA,
     statusCodeEnum.BAD_REQUEST
@@ -19,6 +20,8 @@ module.exports = {
     msgEnum.FILE_MISSING,
     statusCodeEnum.BAD_REQUEST
   ),
+=======
+>>>>>>> c62d688bf270b13db0628cbba613068d844bf808
   INVALID_PASSWORD: new ErrorResponse(
     msgEnum.INVALID_PASSWORD,
     statusCodeEnum.BAD_REQUEST
