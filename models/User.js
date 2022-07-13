@@ -100,7 +100,7 @@ UserSchema.methods.signRefreshToken = async function () {
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRE }
   );
 
-  redisClient.set(this._id.toString(), refreshToken);
+  await redisClient.set(this._id.toString(), refreshToken);
 
   return refreshToken;
 };
