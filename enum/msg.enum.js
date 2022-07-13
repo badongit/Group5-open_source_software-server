@@ -11,4 +11,5 @@ module.exports = {
   EXISTS_USERNAME: "username already exists",
   FILE_MISSING: "file missing",
   FILE_NOT_SUPPORT: "file type :{type} is not supported",
+  INVALID_PASSWORD: "invalid password",
 };
