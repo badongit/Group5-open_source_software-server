@@ -1,4 +1,4 @@
-const ErrorResponse = require("../helpers/error-response");
+const ErrorResponse = require("../helpers/ErrorResponse");
 
 const errorHandle = (err, req, res, next) => {
   let error = { ...err };
@@ -32,9 +32,7 @@ const errorHandle = (err, req, res, next) => {
   }
 
   res.status(error.statusCode || 500).json({
-    success: false,
     message: error.message || "Internal server error",
-    data: null,
   });
 };
 
