@@ -1,15 +1,16 @@
 const drive = require("./drive");
 const fs = require("fs");
 
-const parents = [process.env.DRIVE_PARENT_ID];
-
-module.exports.uploadFileToDrive = async function (file, { name, mimeType }) {
+module.exports.uploadFileToDrive = async function (
+  file,
+  { name, mimeType, parents }
+) {
   try {
     const response = await drive.files.create({
       requestBody: {
         name: name || file.name,
         mimeType: mimeType || file.mimetype,
-        parents,
+        parents: [parents],
       },
       media: {
         mimeType: mimeType || file.mimetype,
@@ -47,7 +48,7 @@ module.exports.generateLinkFileByID = async function (fileId) {
 module.exports.updateFileInDrive = async function (
   fileId,
   file,
-  { name, mimeType }
+  { name, mimeType, parents }
 ) {
   try {
     const response = await drive.files.update({
@@ -55,7 +56,7 @@ module.exports.updateFileInDrive = async function (
       requestBody: {
         name: name || file.name,
         mimeType: mimeType || file.mimetype,
-        parents,
+        parents: [parents],
       },
       media: {
         mimeType: mimeType || file.mimetype,

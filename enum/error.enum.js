@@ -15,4 +15,8 @@ module.exports = {
     msgEnum.MISSING_DATA,
     statusCodeEnum.BAD_REQUEST
   ),
+  FILE_MISSING: new ErrorResponse(
+    msgEnum.FILE_MISSING,
+    statusCodeEnum.BAD_REQUEST
+  ),
 };

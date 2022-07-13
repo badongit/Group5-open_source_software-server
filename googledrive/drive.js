@@ -1,5 +1,4 @@
 const { google } = require("googleapis");
-const configuration = require("../configs/configuration");
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env.DRIVE_CLIENT_ID,
