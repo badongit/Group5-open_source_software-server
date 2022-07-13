@@ -4,96 +4,68 @@ const msgEnum = require("../enum/msg.enum");
 const ResponseBuilder = require("../helpers/response-builder");
 const ErrorResponse = require("../helpers/error-response");
 const User = require("../models/User");
+const errorEnum = require("../enum/error.enum");
 
 module.exports = {
-  //@route [GET] /
-  index: asyncHandle((req, res, next) => {
-    return res.status(statusCodeEnum.OK).json(new ResponseBuilder({}));
-  }),
-
-  //@route [POST] /register
+  //@route [POST] /auth/register
   register: asyncHandle(async (req, res, next) => {
     const { username, email, password, displayname } = req.body;
 
     if (!(username && email && password && displayname)) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.MISSING_DATA)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
-        );
+      return next(errorEnum.MISSING_DATA);
     }
 
     const checkEmail = await User.findOne({ email });
     if (checkEmail) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.EXISTS_EMAIL)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
-        );
+      return next(
+        new ErrorResponse(msgEnum.EXISTS_EMAIL, statusCodeEnum.BAD_REQUEST)
+      );
     }
 
     const checkUsername = await User.findOne({ username });
     if (checkUsername) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.EXISTS_USERNAME)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
-        );
+      return next(
+        new ErrorResponse(msgEnum.EXISTS_USERNAME, statusCodeEnum.BAD_REQUEST)
+      );
     }
 
     const user = await User.create({
       username,
       email,
       password,
-      displayname
-    })
+      displayname,
+    });
 
     const accessToken = user.signAccessToken();
     const refreshToken = await user.signRefreshToken();
 
-    res.status(statusCodeEnum.OK).json(
+    return res.status(statusCodeEnum.CREATED).json(
       new ResponseBuilder({
         user,
         accessToken,
-        refreshToken
-      })
-        .withMessage("Your account has been registered successfully!")
-        .build()
-      );
+        refreshToken,
+      }).build()
+    );
   }),
 
-  //@route [POST] /login
+  //@route [POST] /auth/login
   login: asyncHandle(async (req, res, next) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.MISSING_DATA)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
-      );
+      return next(errorEnum.MISSING_DATA);
     }
 
     const user = await User.findOne({ username }).select("password");
     if (!user) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.INCORRECT_INFO)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
+      return next(
+        new ErrorResponse(msgEnum.INCORRECT_INFO, statusCodeEnum.BAD_REQUEST)
       );
     }
 
     if (!user.matchPassword(password)) {
-      return res.status(statusCodeEnum.BAD_REQUEST).json(
-        new ResponseBuilder()
-          .withMessage(msgEnum.INCORRECT_INFO)
-          .withCode(statusCodeEnum.BAD_REQUEST)
-          .build()
+      return next(
+        new ErrorResponse(msgEnum.INCORRECT_INFO, statusCodeEnum.BAD_REQUEST)
       );
     }
 
@@ -103,21 +75,17 @@ module.exports = {
     res.status(statusCodeEnum.OK).json(
       new ResponseBuilder({
         accessToken,
-        refreshToken
-      })
-        .withMessage("Login successfully!")
-        .build()
-      );
+        refreshToken,
+      }).build()
+    );
   }),
 
-  //@route [POST] /new-token
+  //@route [POST] /auth/new-token
   newToken: asyncHandle(async (req, res, next) => {
     const accessToken = req.user.signAccessToken();
 
-    res.status(statusCodeEnum.OK).json(
-      new ResponseBuilder({ accessToken })
-        .withMessage("Token has been refreshed successfully!")
-        .build()
-      );
-  })
+    res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ accessToken }).build());
+  }),
 };
