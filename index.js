@@ -18,7 +18,6 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-redisClient.connect();
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
