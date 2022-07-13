@@ -9,16 +9,19 @@ class ResponseBuilder {
 
   withMessage(msg) {
     this.message = msg;
+    return this;
   }
 
   withCode(statusCode) {
     this.success = statusCode && statusCode < 400;
+    return this;
   }
 
   withPagination({ total, page, limit }) {
     this.page = page;
     this.total = total;
     this.limit = limit;
+    return this;
   }
 
   build() {
