@@ -234,13 +234,16 @@ module.exports = {
   }),
 
   resetPassword: asyncHandle(async (req, res, next) => {
-    const { token } = req.params;
-
-    if (!token) {
+    if (!req.params.token) {
       return next(
         new ErrorResponse(msgEnum.INVALID_TOKEN, statusCodeEnum.BAD_REQUEST)
       );
     }
+
+    const token = crypto
+      .createHash("sha256", process.env.RESET_TOKEN_SECRET)
+      .update(req.params.token)
+      .digest("hex");
 
     const user = await User.findOne({
       resetPasswordToken: token,

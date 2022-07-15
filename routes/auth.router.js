@@ -20,7 +20,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/new-token", verifyRefreshToken, newToken);
 router.post("/password/forgot", forgotPassword);
-router.post("/password/reset", resetPassword);
+router.post("/password/reset/:token", resetPassword);
 
 router.use(verifyAccessToken);
 router.put("/avatar", changeAvatar);
