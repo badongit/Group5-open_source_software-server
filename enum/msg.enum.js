@@ -14,5 +14,5 @@ module.exports = {
   INVALID_PASSWORD: "invalid password",
   INVALID_MAIL: "invalid email",
   INVALID_TOKEN: "invalid token",
-  PASSWORD_MISSING: "Missing password",
+  CHECK_EMAIL: "check your email",
 };

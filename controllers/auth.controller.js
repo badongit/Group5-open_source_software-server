@@ -216,9 +216,9 @@ module.exports = {
     const resetPasswordToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: true });
 
-    const resetURL = `${configuration.CLIENT_URI}/reset-password/${resetPasswordToken}`;
+    const resetURL = `${process.env.CLIENT_URI}/reset-password/${resetPasswordToken}`;
     const html = `<p>please click here ${resetURL} to update your password. 
-    the link lasts in  ${configuration.resetPassword.EXPIRED} minutes.</p>`;
+    the link lasts in  ${+process.env.RESET_TOKEN_EXPIRE} minutes.</p>`;
 
     const options = {
       email,
@@ -228,13 +228,13 @@ module.exports = {
 
     await sendMail(options);
 
-    res.status(200).json({
-      message: "check your email",
-    });
+    return res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder().withMessage(msgEnum.CHECK_EMAIL).build());
   }),
 
   resetPassword: asyncHandle(async (req, res, next) => {
-    const { token } = req.query;
+    const { token } = req.params;
 
     if (!token) {
       return next(
@@ -243,10 +243,7 @@ module.exports = {
     }
 
     const user = await User.findOne({
-      resetPasswordToken: crypto
-        .createHash("sha256", process.env.RESET_TOKEN_SECRET)
-        .update(token)
-        .digest("hex"),
+      resetPasswordToken: token,
       resetPasswordExpired: { $gt: Date.now() },
     });
 
@@ -258,18 +255,14 @@ module.exports = {
 
     const { password } = req.body;
     if (!password) {
-      return next(
-        new ErrorResponse(msgEnum.PASSWORD_MISSING, statusCodeEnum.BAD_REQUEST)
-      );
+      return next(new ErrorResponse(errorEnum.BAD_REQUEST));
     }
 
-    user.password = req.body.password;
+    user.password = password;
     user.resetPasswordToken = null;
     user.resetPasswordExpired = null;
     await user.save();
 
-    res.status(200).json({
-      message: "changed password successfully",
-    });
+    res.status(statusCodeEnum.OK).json(new ResponseBuilder().build());
   }),
 };
