@@ -8,6 +8,8 @@ const {
   getMe,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/auth.controller");
 const {
   verifyRefreshToken,
@@ -17,6 +19,8 @@ const {
 router.post("/register", register);
 router.post("/login", login);
 router.post("/new-token", verifyRefreshToken, newToken);
+router.post("/password/forgot", forgotPassword);
+router.post("/password/reset/:token", resetPassword);
 
 router.use(verifyAccessToken);
 router.put("/avatar", changeAvatar);

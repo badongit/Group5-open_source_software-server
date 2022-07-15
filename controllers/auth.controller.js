@@ -8,6 +8,9 @@ const msgEnum = require("../enum/msg.enum");
 const isAllowType = require("../helpers/is-allow-type");
 const driveServices = require("../googledrive/services");
 const redisClient = require("../configs/redis");
+const configuration = require("../configs/configuration");
+const sendMail = require("../helpers/sendMail");
+const crypto = require("crypto");
 
 module.exports = {
   //@route [POST] /auth/register
@@ -188,5 +191,81 @@ module.exports = {
     return res
       .status(statusCodeEnum.OK)
       .json(new ResponseBuilder({ user }).build());
+  }),
+
+  forgotPassword: asyncHandle(async (req, res, next) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return next(
+        new ErrorResponse(msgEnum.INVALID_MAIL, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(
+        new ErrorResponse(
+          msgEnum.NOT_FOUND.replace(":{entity}", "user"),
+          statusCodeEnum.NOT_FOUND
+        )
+      );
+    }
+
+    const resetPasswordToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: true });
+
+    const resetURL = `${process.env.CLIENT_URI}/reset-password/${resetPasswordToken}`;
+    const html = `<p>please click here ${resetURL} to update your password. 
+    the link lasts in  ${+process.env.RESET_TOKEN_EXPIRE} minutes.</p>`;
+
+    const options = {
+      email,
+      subject: "Forgot password ?",
+      html,
+    };
+
+    sendMail(options);
+
+    return res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder().withMessage(msgEnum.CHECK_EMAIL).build());
+  }),
+
+  resetPassword: asyncHandle(async (req, res, next) => {
+    if (!req.params.token) {
+      return next(
+        new ErrorResponse(msgEnum.INVALID_TOKEN, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const token = crypto
+      .createHash("sha256", process.env.RESET_TOKEN_SECRET)
+      .update(req.params.token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpired: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(
+        new ErrorResponse(msgEnum.INVALID_TOKEN, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const { password } = req.body;
+    if (!password) {
+      return next(new ErrorResponse(errorEnum.BAD_REQUEST));
+    }
+
+    user.password = password;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpired = null;
+    await user.save();
+
+    res.status(statusCodeEnum.OK).json(new ResponseBuilder().build());
   }),
 };
