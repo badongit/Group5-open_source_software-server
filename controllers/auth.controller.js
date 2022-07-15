@@ -226,7 +226,7 @@ module.exports = {
       html,
     };
 
-    await sendMail(options);
+    sendMail(options);
 
     return res
       .status(statusCodeEnum.OK)
