@@ -16,7 +16,7 @@ module.exports = (io, socket) => async (req) => {
 
     if (!conversation) {
       return socket.emit(SocketEvent.ERROR, {
-        message: socketMsg.NOT_FOUND.replace(":{message}", "conversation"),
+        message: socketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
       });
     }
 
