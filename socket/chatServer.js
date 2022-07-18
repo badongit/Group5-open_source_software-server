@@ -47,5 +47,13 @@ module.exports.listen = (server) => {
     }
 
     socket.on(SocketEvent.DISCONNECT, listeners.disconnect(io, socket));
+
+    // join room
+    socket.on(SocketEvent.CLIENT_JOIN_ROOM, listeners.joinRoom(io, socket));
+    // create conversation
+    socket.on(
+      SocketEvent.CLIENT_CREATE_CONVERSATION,
+      listeners.createConversation(io, socket)
+    );
   });
 };
