@@ -20,8 +20,15 @@ const MessageSchema = new Schema(
       type: String,
       trim: true,
     },
-    image: String,
-    imageId: String,
+    file: String,
+    fileId: String,
+    fileType: {
+      type: String,
+      enum: {
+        values: ["image", "video", "normal"],
+        message: "file type {VALUE} is not supported",
+      },
+    },
     type: {
       type: String,
       enum: {

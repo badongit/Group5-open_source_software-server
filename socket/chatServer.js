@@ -11,9 +11,9 @@ module.exports.listen = (server) => {
   const io = socketIO(server, {
     cors: {
       origin: "*",
-      maxHttpBufferSize: 8e6,
     },
-    transports: ["polling"],
+    maxHttpBufferSize: 8e6,
+    transports: ["websocket"],
   });
 
   //middleware auth
@@ -62,8 +62,15 @@ module.exports.listen = (server) => {
 
     //client send message
     socket.on(
-      SovketEvent.CLIENT_SEND_MESSAGE,
+      SocketEvent.CLIENT_SEND_MESSAGE,
       listeners.sendMessage(io, socket)
     );
+
+    //client send file
+    socket.on(SocketEvent.CLIENT_SEND_FILE, listeners.sendFile(io, socket));
+
+    socket.on(SocketEvent.ERROR, (error) => {
+      console.log(error);
+    });
   });
 };
