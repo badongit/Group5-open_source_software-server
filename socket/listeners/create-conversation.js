@@ -8,7 +8,7 @@ const { default: mongoose } = require("mongoose");
 
 module.exports = (io, socket) => async (req) => {
   try {
-    const { title, members } = req;
+    let { title, members } = req;
     const users = await User.find({ _id: { $in: members } });
 
     if (!title || !members) {
@@ -18,9 +18,9 @@ module.exports = (io, socket) => async (req) => {
     }
 
     members = users.map((user) => user._id);
-    members = toArrayUnique([members, socket.currentUser._id]);
+    members = toArrayUnique([...members, socket.currentUser._id]);
 
-    if (members?.length < 3) {
+    if (members?.length < 2) {
       return socket.emit(SocketEvent.ERROR, {
         message: socketMsg.BAD_REQUEST,
       });
