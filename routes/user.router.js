@@ -1,12 +1,11 @@
-const router = require("express").Router();
-const {
-    verifyRefreshToken,
-    verifyAccessToken,
-  } = require("../middlewares/auth");
-  
-const { getAll, getById } = require("../controllers/user.controller");
+const express = require("express");
+const router = express.Router();
+const advancedResults = require("../middlewares/advancedResults");
+const User = require("../models/User");
+const { getUsers, getUserById } = require("../controllers/user.controller");
 
-router.get("/" ,getAll);
-router.get("/:id", getById);
+router.get("/", advancedResults(User), getUsers);
+
+router.get("/:id", getUserById);
 
 module.exports = router;
