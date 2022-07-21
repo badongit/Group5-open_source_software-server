@@ -7,6 +7,6 @@ const {
 const { getAll, getById } = require("../controllers/user.controller");
 
 router.get("/" ,getAll);
-router.get("/getById/:id", getById);
+router.get("/:id", getById);
 
 module.exports = router;
