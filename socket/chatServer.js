@@ -25,7 +25,10 @@ module.exports.listen = (server) => {
 
       if (!user) {
         return next(
-          new ErrorResponse(SocketMsg.NOT_FOUND_USER, statusCodeEnum.NOT_FOUND)
+          new ErrorResponse(
+            SocketMsg.NOT_FOUND.replace(":{entity}", "user"),
+            statusCodeEnum.NOT_FOUND
+          )
         );
       }
 
@@ -47,5 +50,20 @@ module.exports.listen = (server) => {
     }
 
     socket.on(SocketEvent.DISCONNECT, listeners.disconnect(io, socket));
+
+    // join room
+    socket.on(SocketEvent.CLIENT_JOIN_ROOM, listeners.joinRoom(io, socket));
+
+    // create conversation
+    socket.on(
+      SocketEvent.CLIENT_CREATE_CONVERSATION,
+      listeners.createConversation(io, socket)
+    );
+
+    //client send message
+    socket.on(
+      SovketEvent.CLIENT_SEND_MESSAGE,
+      listeners.sendMessage(io, socket)
+    );
   });
 };
