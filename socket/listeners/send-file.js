@@ -3,11 +3,18 @@ const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketMsg = require("../constants/socket-msg");
-const SocketEvent = require("../constants/socket-event");
+const fs = require("fs");
 
 module.exports = (io, socket) => async (req) => {
   try {
-    const { text, userId, subId } = req;
+    console.log(req);
+    return;
+    const { file, userId, subId } = req;
+    const { type, size } = req.metadata;
+    console.log(`on client send file`);
+    console.log(`-----------file:`, file);
+    console.log(`--------------metadata: `, req.metadata);
+    return;
     let conversationId = req.conversationId;
     const receiver = await User.findById(userId);
     const sender = socket.currentUser;
@@ -16,12 +23,6 @@ module.exports = (io, socket) => async (req) => {
     if (!(receiver || conversationId)) {
       return socket.emit(SocketEvent.ERROR, {
         message: SocketMsg.NOT_FOUND.replace(":{entity}", "user"),
-      });
-    }
-
-    if (!text) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.BAD_REQUEST,
       });
     }
 
