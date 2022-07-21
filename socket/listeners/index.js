@@ -3,6 +3,7 @@ const joinRoom = require("./join-room");
 const createConversation = require("./create-conversation");
 const sendMessage = require("./send-message");
 const sendFile = require("./send-file");
+const getConversations = require("./get-conversations");
 
 module.exports = {
   disconnect,
@@ -10,4 +11,5 @@ module.exports = {
   createConversation,
   sendMessage,
   sendFile,
+  getConversations,
 };

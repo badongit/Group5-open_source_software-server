@@ -3,6 +3,7 @@ const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketMsg = require("../constants/socket-msg");
+const SocketEvent = require("../constants/socket-event");
 
 module.exports = (io, socket) => async (req) => {
   try {

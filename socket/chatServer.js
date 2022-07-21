@@ -72,5 +72,11 @@ module.exports.listen = (server) => {
     socket.on(SocketEvent.ERROR, (error) => {
       console.log(error);
     });
+
+    // get conversations
+    socket.on(
+      SocketEvent.CLIENT_GET_CONVERSATIONS,
+      listeners.getConversations(io, socket)
+    );
   });
 };
