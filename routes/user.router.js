@@ -5,8 +5,7 @@ const User = require("../models/User");
 const { getUsers, getUserById } = require("../controllers/user.controller");
 const { verifyAccessToken } = require("../middlewares/auth");
 
-router.get("/", advancedResults(User), getUsers);
-
 router.get("/:id", getUserById);
+router.get("/", verifyAccessToken, advancedResults(User), getUsers);
 
 module.exports = router;

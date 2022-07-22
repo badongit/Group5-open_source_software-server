@@ -1,4 +1,5 @@
 const configuration = require("../configs/configuration");
+const errorEnum = require("../enum/error.enum");
 const ErrorResponse = require("../helpers/error-response");
 const asyncHandle = require("../middlewares/asyncHandle");
 
@@ -39,12 +40,12 @@ const advancedResults = (model, populates) =>
       query = query.sort("-createdAt");
     }
 
-    const limit = +req.query.limit || +configuration.LIMIT;
-    const startIndex = +req.query.startIndex || +configuration.START;
+    const limit = +req.query.limit || +process.env.LIMIT;
+    const startIndex = +req.query.startIndex || +process.env.START;
     const endIndex = startIndex + limit;
     const total = await model.countDocuments(conditions);
 
-    query = query.skip(startIndex).limit(limit);
+    query = query.skip(startIndex).limit(limit).lean();
 
     if (populates?.length) {
       populates.forEach((populate) => {
@@ -54,15 +55,11 @@ const advancedResults = (model, populates) =>
 
     const results = await query;
 
-    if (!results) {
-      return next(new ErrorResponse("Bad request", 400));
-    }
-
     const pagination = { total };
 
     if (endIndex < total) {
       pagination.next = {
-        startIndex: endIndex + 1,
+        startIndex: endIndex,
         limit,
       };
     }

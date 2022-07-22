@@ -9,6 +9,7 @@ const isAllowType = require("../helpers/is-allow-type");
 const driveServices = require("../googledrive/services");
 
 module.exports = {
+  //@route [PUT] /conversations/:conversationId/photo
   changePhotoLink: asyncHandle(async (req, res, next) => {
     const photoFile = req.files.photo;
 
@@ -25,14 +26,20 @@ module.exports = {
       );
     }
 
-    const conversation = await Conversation.findById(req.params.conversationId)
+    const conversation = await Conversation.findOne({
+      _id: req.params.conversationId,
+      type: "group",
+    })
       .populate({ path: "members", select: "-username -avatarId" })
       .populate({ path: "admin", select: "-username -avatarId" })
       .populate("lastMessage");
 
     if (!conversation) {
       return next(
-        new ErrorResponse(msgEnum.NOT_FOUND, statusCodeEnum.NOT_FOUND)
+        new ErrorResponse(
+          msgEnum.NOT_FOUND.replace(":{entity}", "conversation"),
+          statusCodeEnum.NOT_FOUND
+        )
       );
     }
 
@@ -43,9 +50,7 @@ module.exports = {
         ) + 1
       )
     ) {
-      return next(
-        new ErrorResponse(msgEnum.FORBIDDEN, statusCodeEnum.FORBIDDEN)
-      );
+      return next(errorEnum.FORBIDDEN);
     }
 
     const response = await driveServices.uploadFileToDrive(photoFile, {
@@ -66,6 +71,6 @@ module.exports = {
 
     return res
       .status(statusCodeEnum.OK)
-      .json(new ResponseBuilder({ conversation }));
+      .json(new ResponseBuilder({ conversation }).build());
   }),
 };

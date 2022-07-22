@@ -23,4 +23,5 @@ module.exports = {
     msgEnum.INVALID_PASSWORD,
     statusCodeEnum.BAD_REQUEST
   ),
+  FORBIDDEN: new ErrorResponse(msgEnum.FORBIDDEN, statusCodeEnum.FORBIDDEN),
 };

@@ -2,21 +2,35 @@ const asyncHandle = require("../middlewares/asyncHandle");
 const ResponseBuilder = require("../helpers/response-builder");
 const statusCodeEnum = require("../enum/status-code.enum");
 const User = require("../models/User");
+const ErrorResponse = require("../helpers/error-response");
+const msgEnum = require("../enum/msg.enum");
 
 module.exports = {
   //@route [GET] /api/users
   getUsers: asyncHandle(async (req, res, next) => {
-    res.status(200).json(res.advancedResults);
     res
       .status(statusCodeEnum.OK)
-      .json(new ResponseBuilder(res.advancedResults).build());
+      .json(
+        new ResponseBuilder({ users: res.advancedResults.data })
+          .withPagination(res.advancedResults.pagination)
+          .build()
+      );
   }),
-  //@route [GET] /api/users:id
+  //@route [GET] /api/users/:id
   getUserById: asyncHandle(async (req, res, next) => {
-    var userID = req.params.id;
+    const userId = req.params.id;
 
-    var user = await User.findById(userID);
+    const user = await User.findById(userId).lean();
 
-    return res.status(statusCodeEnum.OK).json(new ResponseBuilder(user));
+    if (!user) {
+      return next(
+        new ErrorResponse(
+          msgEnum.NOT_FOUND.replace(":{entity}", "user"),
+          statusCodeEnum.NOT_FOUND
+        )
+      );
+    }
+
+    return res.status(statusCodeEnum.OK).json(new ResponseBuilder({ user }));
   }),
 };
