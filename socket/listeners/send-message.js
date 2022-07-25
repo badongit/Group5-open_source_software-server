@@ -7,7 +7,7 @@ const SocketEvent = require("../constants/socket-event");
 
 module.exports = (io, socket) => async (req) => {
   try {
-    const { text, userId, subId } = req;
+    const { text, userId, subId, file, metadata } = req;
     let conversationId = req.conversationId;
     const receiver = await User.findById(userId);
     const sender = socket.currentUser;
@@ -19,7 +19,13 @@ module.exports = (io, socket) => async (req) => {
       });
     }
 
-    if (!text) {
+    if (!text && !file) {
+      return socket.emit(SocketEvent.ERROR, {
+        message: SocketMsg.BAD_REQUEST,
+      });
+    }
+
+    if (file && !(metadata?.name && metadata.type)) {
       return socket.emit(SocketEvent.ERROR, {
         message: SocketMsg.BAD_REQUEST,
       });
