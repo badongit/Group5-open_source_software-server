@@ -74,62 +74,64 @@ module.exports = {
       .json(new ResponseBuilder({ conversation }).build());
   }),
 
-    changeRole: asyncHandle(async (req, res, next) => {
-        const { userId, role } = req.body;
+  //@route [PUT]
+  changeRole: asyncHandle(async (req, res, next) => {
+    const { userId, role } = req.body;
 
-        if (!role || !userId) {
-            return next(errorEnum.BAD_REQUEST);
-        }
+    if (!role || !userId) {
+      return next(errorEnum.BAD_REQUEST);
+    }
 
-        const conversation = await Conversation.findById(req.params.conversationId);
+    const conversation = await Conversation.findById(req.params.conversationId);
 
-        if (!conversation) {
-            return next(errorEnum.BAD_REQUEST);
-        }
+    if (!conversation) {
+      return next(errorEnum.BAD_REQUEST);
+    }
 
-        const isMember = conversation.members.includes(userId);
+    if (!conversation.admin.includes(req.user._id)) {
+      return next(errorEnum.FORBIDDEN);
+    }
 
-        if (!isMember) {
-            return next(
-                new ErrorResponse(msgEnum.NOT_MEMBER, statusCodeEnum.BAD_REQUEST)
-            );
-        }
+    const isMember = conversation.members.includes(userId);
 
-        if (!['admin', 'members'].includes(role)) {
-            return next(
-                new ErrorResponse(msgEnum.INVALID_ROLE, statusCodeEnum.BAD_REQUEST)
-            );
-        }
+    if (!isMember) {
+      return next(
+        new ErrorResponse(msgEnum.NOT_MEMBER, statusCodeEnum.BAD_REQUEST)
+      );
+    }
 
-        const isAdmin = conversation.admin.includes(userId);
+    if (!["admin", "members"].includes(role)) {
+      return next(
+        new ErrorResponse(msgEnum.INVALID_ROLE, statusCodeEnum.BAD_REQUEST)
+      );
+    }
 
-        if (role === "admin" && !isAdmin) {
-            conversation.admin = conversation.admin.concat(userId);
-            await conversation.save();
-        }
+    const isAdmin = conversation.admin.includes(userId);
 
-        if (role === "members" && isAdmin) {
-            conversation.admin = conversation.admin.filter(
-                (ad) => ad._id.toString() !== userId
-            );
+    if (role === "admin" && !isAdmin) {
+      conversation.admin = conversation.admin.concat(userId);
+      await conversation.save();
+    }
 
-            if (!conversation.admin.length) {
-                conversation.admin = conversation.admin.concat(conversation.members[0]);
-            }
-            await conversation.save();
-        }
+    if (role === "members" && isAdmin) {
+      conversation.admin = conversation.admin.filter(
+        (ad) => ad._id.toString() !== userId
+      );
 
-        await conversation.populate([
-            { path: "members", select: "-username -avatarId" },
-            { path: "admin", select: "-username -avatarId" },
-            "lastMessage",
-        ]);
+      if (!conversation.admin.length) {
+        conversation.admin = conversation.admin.concat(conversation.members[0]);
+      }
+      await conversation.save();
+    }
 
-        res.status(200).json({
-            message: "success",
-            data: {
-                conversation,
-            },
-        });
-    }),
+    await conversation.populate([
+      { path: "members", select: "-username -avatarId" },
+      { path: "admin", select: "-username -avatarId" },
+      "lastMessage",
+    ]);
+
+    res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ conversation }).build());
+  }),
 };
