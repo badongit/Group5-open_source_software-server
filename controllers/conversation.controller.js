@@ -73,4 +73,65 @@ module.exports = {
       .status(statusCodeEnum.OK)
       .json(new ResponseBuilder({ conversation }).build());
   }),
+
+  //@route [PUT]
+  changeRole: asyncHandle(async (req, res, next) => {
+    const { userId, role } = req.body;
+
+    if (!role || !userId) {
+      return next(errorEnum.BAD_REQUEST);
+    }
+
+    const conversation = await Conversation.findById(req.params.conversationId);
+
+    if (!conversation) {
+      return next(errorEnum.BAD_REQUEST);
+    }
+
+    if (!conversation.admin.includes(req.user._id)) {
+      return next(errorEnum.FORBIDDEN);
+    }
+
+    const isMember = conversation.members.includes(userId);
+
+    if (!isMember) {
+      return next(
+        new ErrorResponse(msgEnum.NOT_MEMBER, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    if (!["admin", "members"].includes(role)) {
+      return next(
+        new ErrorResponse(msgEnum.INVALID_ROLE, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const isAdmin = conversation.admin.includes(userId);
+
+    if (role === "admin" && !isAdmin) {
+      conversation.admin = conversation.admin.concat(userId);
+      await conversation.save();
+    }
+
+    if (role === "members" && isAdmin) {
+      conversation.admin = conversation.admin.filter(
+        (ad) => ad._id.toString() !== userId
+      );
+
+      if (!conversation.admin.length) {
+        conversation.admin = conversation.admin.concat(conversation.members[0]);
+      }
+      await conversation.save();
+    }
+
+    await conversation.populate([
+      { path: "members", select: "-username -avatarId" },
+      { path: "admin", select: "-username -avatarId" },
+      "lastMessage",
+    ]);
+
+    res
+      .status(statusCodeEnum.OK)
+      .json(new ResponseBuilder({ conversation }).build());
+  }),
 };
