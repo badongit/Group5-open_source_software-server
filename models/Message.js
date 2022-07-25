@@ -20,7 +20,6 @@ const MessageSchema = new Schema(
       type: String,
       trim: true,
     },
-    file: String,
     fileId: String,
     fileType: {
       type: String,
