@@ -41,7 +41,7 @@ module.exports.generateLinkFileByID = async function (fileId) {
       fields: "webContentLink",
     });
 
-    return results.data.webContentLink;
+    return results.data.webContentLink.replace("&export=download", "");
   } catch (error) {
     console.log(`Error when get link image: ${error.message}`);
     throw error;

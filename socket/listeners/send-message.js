@@ -4,7 +4,7 @@ const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketMsg = require("../constants/socket-msg");
 const SocketEvent = require("../constants/socket-event");
-const driveService = require("../../googledrive/services");
+const driveServices = require("../../googledrive/services");
 const {
   isDenyType,
   getExtensionFile,
@@ -69,16 +69,21 @@ module.exports = (io, socket) => async (req) => {
           const messageEntities = [];
 
           if (file) {
-            const response = await driveService.createFileInDrive(fileBuffer, {
+            const response = await driveServices.createFileInDrive(fileBuffer, {
               type: metadata.type,
               name: subId + getExtensionFile(metadata.name),
               parents: process.env.DRIVE_MESSAGE_PARENTS,
             });
 
+            const fileLink = await driveServices.generateLinkFileByID(
+              response.data.id
+            );
+
             messageEntities.push({
               conversationId: newConversation._id,
               sender,
               subId,
+              file: fileLink,
               fileId: response.data.id,
               fileType: getTypeFile(metadata.type),
             });
@@ -141,16 +146,21 @@ module.exports = (io, socket) => async (req) => {
       const messageEntities = [];
 
       if (file) {
-        const response = await driveService.createFileInDrive(fileBuffer, {
+        const response = await driveServices.createFileInDrive(fileBuffer, {
           type: metadata.type,
           name: subId + getExtensionFile(metadata.name),
           parents: process.env.DRIVE_MESSAGE_PARENTS,
         });
 
+        const fileLink = await driveServices.generateLinkFileByID(
+          response.data.id
+        );
+
         messageEntities.push({
           conversationId: newConversation._id,
           sender,
           subId,
+          file: fileLink,
           fileId: response.data.id,
           fileType: getTypeFile(metadata.type),
         });

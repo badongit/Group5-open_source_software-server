@@ -15,5 +15,6 @@ module.exports.getExtensionFile = (filename) => {
 module.exports.getTypeFile = (mimetype) => {
   if (mimetype.startsWith("image")) return "image";
   if (mimetype.startsWith("video")) return "video";
+  if (mimetype.startsWith("audio")) return "audio";
   return "normal";
 };
