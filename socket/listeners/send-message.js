@@ -3,6 +3,12 @@ const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketMsg = require("../constants/socket-msg");
+const driveService = require("../../googledrive/services");
+const {
+  isDenyType,
+  getExtensionFile,
+  getTypeFile,
+} = require("../../helpers/common");
 
 module.exports = (io, socket) => async (req) => {
   try {
@@ -18,13 +24,21 @@ module.exports = (io, socket) => async (req) => {
       });
     }
 
+    //check missing info message
     if (!text && !file) {
       return socket.emit(SocketEvent.ERROR, {
         message: SocketMsg.BAD_REQUEST,
       });
     }
 
-    if (file && !(metadata?.name && metadata.type)) {
+    //check missing metadata if send file
+    if (file && !(metadata?.name && metadata.type && subId)) {
+      return socket.emit(SocketEvent.ERROR, {
+        message: SocketMsg.BAD_REQUEST,
+      });
+    }
+
+    if (file && isDenyType(metadata.type)) {
       return socket.emit(SocketEvent.ERROR, {
         message: SocketMsg.BAD_REQUEST,
       });
@@ -51,21 +65,38 @@ module.exports = (io, socket) => async (req) => {
 
           const newConversation = newConversationArr[0];
 
-          const messageArr = await Message.create(
-            [
-              {
-                conversation: newConversation._id,
-                sender,
-                text,
-                subId,
-              },
-            ],
-            { session }
-          );
+          const messageEntities = [];
 
-          const message = messageArr[0];
+          if (file) {
+            const response = await driveService.createFileInDrive(fileBuffer, {
+              type: metadata.type,
+              name: subId + getExtensionFile(metadata.name),
+              parents: process.env.DRIVE_MESSAGE_PARENTS,
+            });
 
-          newConversation.lastMessage = message._id;
+            messageEntities.push({
+              conversationId: newConversation._id,
+              sender,
+              subId,
+              fileId: response.data.id,
+              fileType: getTypeFile(metadata.type),
+            });
+          }
+
+          if (text) {
+            messageEntities.push({
+              conversationId: newConversation._id,
+              sender,
+              text,
+              subId,
+            });
+          }
+
+          const messageArr = await Message.create(messageEntities, { session });
+
+          const lastMessage = messageArr[messageArr.length - 1];
+
+          newConversation.lastMessage = lastMessage._id;
           await newConversation.save();
 
           await session.commitTransaction();
@@ -106,21 +137,38 @@ module.exports = (io, socket) => async (req) => {
         });
       }
 
-      const messageArr = await Message.create(
-        [
-          {
-            conversation: conversation._id,
-            sender,
-            text,
-            subId,
-          },
-        ],
-        { session }
-      );
+      const messageEntities = [];
 
-      const message = messageArr[0];
+      if (file) {
+        const response = await driveService.createFileInDrive(fileBuffer, {
+          type: metadata.type,
+          name: subId + getExtensionFile(metadata.name),
+          parents: process.env.DRIVE_MESSAGE_PARENTS,
+        });
 
-      conversation.lastMessage = message._id;
+        messageEntities.push({
+          conversationId: newConversation._id,
+          sender,
+          subId,
+          fileId: response.data.id,
+          fileType: getTypeFile(metadata.type),
+        });
+      }
+
+      if (text) {
+        messageEntities.push({
+          conversationId: newConversation._id,
+          sender,
+          text,
+          subId,
+        });
+      }
+
+      const messageArr = await Message.create(messageEntities, { session });
+
+      const lastMessage = messageArr[messageArr.length - 1];
+
+      conversation.lastMessage = lastMessage._id;
       await conversation.save();
       await session.commitTransaction();
       await conversation.populate([
