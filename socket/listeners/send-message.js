@@ -3,7 +3,10 @@ const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketMsg = require("../constants/socket-msg");
+<<<<<<< HEAD
 const SocketEvent = require("../constants/socket-event");
+=======
+>>>>>>> 462f039 (update socket send message to send both text and file)
 const driveService = require("../../googledrive/services");
 const {
   isDenyType,
