@@ -7,6 +7,7 @@ const errorEnum = require("../enum/error.enum");
 const msgEnum = require("../enum/msg.enum");
 const isAllowType = require("../helpers/is-allow-type");
 const driveServices = require("../googledrive/services");
+const Message = require("../models/Message");
 
 module.exports = {
   //@route [PUT] /conversations/:conversationId/photo
@@ -133,5 +134,49 @@ module.exports = {
     res
       .status(statusCodeEnum.OK)
       .json(new ResponseBuilder({ conversation }).build());
+  }),
+  // [GET] get conversation msg
+  getMsgByConversation: asyncHandle(async (req, res, next) => {
+    var { index, limit, conversation } = req.body;
+
+    var conversation = await Conversation.findById({ conversation });
+
+    if (!conversation)
+      return next(
+        new ErrorResponse(
+          statusCodeEnum.NOT_FOUND.replace(":{entity}", "conversation"),
+          statusCodeEnum.NOT_FOUND
+        )
+      );
+
+    if (
+      conversation.get("members").find((e) => e == req.id) == undefined
+    ) {
+      return next(errorEnum.BAD_REQUEST);
+    }
+
+    var message = await Message.find({
+      conversation: id_conversation,
+      type: "user",
+    })
+      .sort({ createdAt: -1 })
+      .skip(index)
+      .limit(limit);
+
+    message = message.map((e) => {
+      if (e.deletedAt != undefined) e.text = "";
+      return e;
+    });
+
+    var lastMessage = await Message.find({ _id: conversation.lastMessage });
+
+    return res.status(statusCodeEnum.OK).json(
+      new ResponseBuilder({
+        message,
+        index,
+        limit,
+        lastMessgae: lastMessage,
+      })
+    );
   }),
 };
