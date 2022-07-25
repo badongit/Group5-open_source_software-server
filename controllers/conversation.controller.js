@@ -9,6 +9,7 @@ const isAllowType = require("../helpers/is-allow-type");
 const driveServices = require("../googledrive/services");
 
 module.exports = {
+  //@route [PUT] /conversations/:conversationId/photo
   changePhotoLink: asyncHandle(async (req, res, next) => {
     const photoFile = req.files.photo;
 
@@ -25,14 +26,20 @@ module.exports = {
       );
     }
 
-    const conversation = await Conversation.findById(req.params.conversationId)
+    const conversation = await Conversation.findOne({
+      _id: req.params.conversationId,
+      type: "group",
+    })
       .populate({ path: "members", select: "-username -avatarId" })
       .populate({ path: "admin", select: "-username -avatarId" })
       .populate("lastMessage");
 
     if (!conversation) {
       return next(
-        new ErrorResponse(msgEnum.NOT_FOUND, statusCodeEnum.NOT_FOUND)
+        new ErrorResponse(
+          msgEnum.NOT_FOUND.replace(":{entity}", "conversation"),
+          statusCodeEnum.NOT_FOUND
+        )
       );
     }
 
@@ -43,9 +50,7 @@ module.exports = {
         ) + 1
       )
     ) {
-      return next(
-        new ErrorResponse(msgEnum.FORBIDDEN, statusCodeEnum.FORBIDDEN)
-      );
+      return next(errorEnum.FORBIDDEN);
     }
 
     const response = await driveServices.uploadFileToDrive(photoFile, {
@@ -66,65 +71,65 @@ module.exports = {
 
     return res
       .status(statusCodeEnum.OK)
-      .json(new ResponseBuilder({ conversation }));
+      .json(new ResponseBuilder({ conversation }).build());
   }),
 
-  changeRole: asyncHandle(async (req, res, next) => {
-    const { userId, role } = req.body;
+    changeRole: asyncHandle(async (req, res, next) => {
+        const { userId, role } = req.body;
 
-    if (!role || !userId) {
-      return next(errorEnum.BAD_REQUEST);
-    }
+        if (!role || !userId) {
+            return next(errorEnum.BAD_REQUEST);
+        }
 
-    const conversation = await Conversation.findById(req.params.conversationId);
+        const conversation = await Conversation.findById(req.params.conversationId);
 
-    if (!conversation) {
-      return next(errorEnum.BAD_REQUEST);
-    }
+        if (!conversation) {
+            return next(errorEnum.BAD_REQUEST);
+        }
 
-    const isMember = conversation.members.includes(userId);
+        const isMember = conversation.members.includes(userId);
 
-    if (!isMember) {
-      return next(
-        new ErrorResponse(msgEnum.NOT_MEMBER, statusCodeEnum.BAD_REQUEST)
-      );
-    }
+        if (!isMember) {
+            return next(
+                new ErrorResponse(msgEnum.NOT_MEMBER, statusCodeEnum.BAD_REQUEST)
+            );
+        }
 
-    if (!['admin', 'members'].includes(role)) {
-      return next(
-          new ErrorResponse(msgEnum.INVALID_ROLE, statusCodeEnum.BAD_REQUEST)
-      );
-    }
+        if (!['admin', 'members'].includes(role)) {
+            return next(
+                new ErrorResponse(msgEnum.INVALID_ROLE, statusCodeEnum.BAD_REQUEST)
+            );
+        }
 
-    const isAdmin = conversation.admin.includes(userId);
+        const isAdmin = conversation.admin.includes(userId);
 
-    if (role === "admin" && !isAdmin) {
-      conversation.admin = conversation.admin.concat(userId);
-      await conversation.save();
-    }
+        if (role === "admin" && !isAdmin) {
+            conversation.admin = conversation.admin.concat(userId);
+            await conversation.save();
+        }
 
-    if (role === "members" && isAdmin) {
-      conversation.admin = conversation.admin.filter(
-        (ad) => ad._id.toString() !== userId
-      );
+        if (role === "members" && isAdmin) {
+            conversation.admin = conversation.admin.filter(
+                (ad) => ad._id.toString() !== userId
+            );
 
-      if (!conversation.admin.length) {
-        conversation.admin = conversation.admin.concat(conversation.members[0]);
-      }
-      await conversation.save();
-    }
+            if (!conversation.admin.length) {
+                conversation.admin = conversation.admin.concat(conversation.members[0]);
+            }
+            await conversation.save();
+        }
 
-    await conversation.populate([
-      { path: "members", select: "-username -avatarId" },
-      { path: "admin", select: "-username -avatarId" },
-      "lastMessage",
-    ]);
+        await conversation.populate([
+            { path: "members", select: "-username -avatarId" },
+            { path: "admin", select: "-username -avatarId" },
+            "lastMessage",
+        ]);
 
-    res.status(200).json({
-      message: "success",
-      data: {
-        conversation,
-      },
-    });
-  }),
+        res.status(200).json({
+            message: "success",
+            data: {
+                conversation,
+            },
+        });
+    }),
 };

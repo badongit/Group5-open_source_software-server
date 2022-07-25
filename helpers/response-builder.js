@@ -17,10 +17,9 @@ class ResponseBuilder {
     return this;
   }
 
-  withPagination({ total, page, limit }) {
-    this.page = page;
+  withPagination({ total, next }) {
     this.total = total;
-    this.limit = limit;
+    this.next = next;
     return this;
   }
 
@@ -31,11 +30,10 @@ class ResponseBuilder {
       data: this.data,
     };
 
-    if (this.page) {
+    if (this.total !== undefined) {
       response.pagination = {
-        page: this.page,
-        limit: this.limit,
         total: this.total,
+        next: this.next,
       };
     }
 
