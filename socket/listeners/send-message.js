@@ -116,7 +116,7 @@ module.exports = (io, socket) => async (req) => {
             message: error.message,
           });
         } finally {
-          session.endSession();
+          await session.endSession();
         }
 
         return;
@@ -196,7 +196,7 @@ module.exports = (io, socket) => async (req) => {
         message: error.message,
       });
     } finally {
-      session.endSession();
+      await session.endSession();
     }
   } catch (error) {
     socket.emit(SocketEvent.ERROR, {

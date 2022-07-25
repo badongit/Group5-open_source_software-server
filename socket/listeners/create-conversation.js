@@ -1,10 +1,10 @@
+const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const SocketEvent = require("../constants/socket-event");
 const socketMsg = require("../constants/socket-msg");
 const { toArrayUnique } = require("../../helpers/common");
-const { default: mongoose } = require("mongoose");
 
 module.exports = (io, socket) => async (req) => {
   try {
@@ -20,7 +20,7 @@ module.exports = (io, socket) => async (req) => {
     members = users.map((user) => user._id);
     members = toArrayUnique([...members, socket.currentUser._id]);
 
-    if (members?.length < 2) {
+    if (members?.length < 3) {
       return socket.emit(SocketEvent.ERROR, {
         message: socketMsg.BAD_REQUEST,
       });
@@ -66,6 +66,8 @@ module.exports = (io, socket) => async (req) => {
       socket.emit(SocketEvent.ERROR, {
         message: error.message,
       });
+    } finally {
+      await session.endSession();
     }
   } catch (error) {
     console.log(`Error socket: ${error.message}`);
