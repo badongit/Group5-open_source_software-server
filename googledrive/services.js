@@ -1,5 +1,6 @@
 const drive = require("./drive");
 const fs = require("fs");
+const { Readable } = require("stream");
 
 module.exports.uploadFileToDrive = async function (
   file,
@@ -20,7 +21,8 @@ module.exports.uploadFileToDrive = async function (
 
     return response;
   } catch (error) {
-    console.log(`Error uploading file to drive: ${error.message}`);
+    console.log(`Error when uploading file to drive: ${error.message}`);
+    throw error;
   }
 };
 
@@ -39,9 +41,10 @@ module.exports.generateLinkFileByID = async function (fileId) {
       fields: "webContentLink",
     });
 
-    return results.data.webContentLink;
+    return results.data.webContentLink.replace("&export=download", "");
   } catch (error) {
-    console.log(`Error get link image: ${error.message}`);
+    console.log(`Error when get link image: ${error.message}`);
+    throw error;
   }
 };
 
@@ -66,7 +69,8 @@ module.exports.updateFileInDrive = async function (
 
     return response;
   } catch (error) {
-    console.log(`Error uploading file to drive: ${error.message}`);
+    console.log(`Error when updating file to drive: ${error.message}`);
+    throw error;
   }
 };
 
@@ -76,6 +80,31 @@ module.exports.deleteFileInDrive = async function (fileId) {
       fileId,
     });
   } catch (error) {
-    console.log(`Error deleting file drive: ${error.message}`);
+    console.log(`Error when deleting file drive: ${error.message}`);
+    throw error;
+  }
+};
+
+module.exports.createFileInDrive = async function (
+  fileBuffer,
+  { type, name, parents }
+) {
+  try {
+    const response = await drive.files.create({
+      requestBody: {
+        name: name,
+        mimeType: type,
+        parents: [parents],
+      },
+      media: {
+        mimeType: type,
+        body: Readable.from(fileBuffer),
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(`Error when creating file drive: ${error.message}`);
+    throw error;
   }
 };

@@ -124,8 +124,7 @@ module.exports = {
 
     const fileId = response.data.id;
 
-    let avatarLink = await driveServices.generateLinkFileByID(fileId);
-    avatarLink = avatarLink.replace("&export=download", "");
+    const avatarLink = await driveServices.generateLinkFileByID(fileId);
 
     user.avatarLink = avatarLink;
     user.avatarId = fileId;

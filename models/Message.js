@@ -25,7 +25,7 @@ const MessageSchema = new Schema(
     fileType: {
       type: String,
       enum: {
-        values: ["image", "video", "normal"],
+        values: ["image", "video", "audio", "normal"],
         message: "file type {VALUE} is not supported",
       },
     },
