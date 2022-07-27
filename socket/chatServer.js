@@ -19,8 +19,9 @@ module.exports.listen = (server) => {
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      const { token } = socket.handshake.auth;
-
+      // const { token } = socket.handshake.auth;
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1ODkzNDUwNywiZXhwIjoxNjU5MDIwOTA3fQ.UebCwnggveW-_xqKNOtbLtGEzJzglv09g7zmpB6NeTk";
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 

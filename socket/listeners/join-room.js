@@ -1,4 +1,3 @@
-const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const SocketEvent = require("../constants/socket-event");
 const socketMsg = require("../constants/socket-msg");
@@ -6,7 +5,7 @@ const socketMsg = require("../constants/socket-msg");
 module.exports = (io, socket) => async (req) => {
   try {
     const conversation = await Conversation.findOne({
-      _id: conversationId,
+      _id: req.conversationId,
       members: socket.currentUser._id,
     })
       .populate({ path: "members" })
@@ -20,7 +19,8 @@ module.exports = (io, socket) => async (req) => {
       });
     }
 
-    socket.join(conversationId);
+    console.log(`-------conversation:`, conversation);
+    socket.join(req.conversationId);
     socket.emit(SocketEvent.SV_SEND_CONVERSATION, { conversation });
   } catch (error) {
     console.log(`Error socket: ${error.message}`);
