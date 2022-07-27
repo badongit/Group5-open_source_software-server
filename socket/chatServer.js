@@ -12,16 +12,15 @@ module.exports.listen = (server) => {
     cors: {
       origin: "*",
     },
-    maxHttpBufferSize: 8e6,
+    maxHttpBufferSize: 20e6,
     transports: ["websocket"],
   });
 
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      // const { token } = socket.handshake.auth;
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1ODc2MDA5NSwiZXhwIjoxNjU4ODQ2NDk1fQ.2qk-tQmzmKwaiXq42m0HqqSDTeJwa-odgsKe8aBwBQI";
+      const { token } = socket.handshake.auth;
+
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 

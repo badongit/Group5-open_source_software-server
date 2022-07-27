@@ -188,10 +188,13 @@ module.exports = (io, socket) => async (req) => {
         "lastMessage",
       ]);
 
-      io.in(conversation._id.toString()).emit(
-        SocketEvent.SV_SEND_MESSAGE,
-        message
-      );
+      messageArr.forEach((message) => {
+        io.in(conversation._id.toString()).emit(
+          SocketEvent.SV_SEND_MESSAGE,
+          message
+        );
+      });
+
       io.in(conversation._id.toString()).emit(
         SocketEvent.SV_SEND_CONVERSATION,
         conversation
