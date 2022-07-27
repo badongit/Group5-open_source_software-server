@@ -3,6 +3,7 @@ const authRouter = require("../routes/auth.router");
 const userRouter = require("../routes/user.router");
 const conversationRouter = require("../routes/conversation.router");
 
+const userConversation = require("../routes/Conversation.router");
 const routers = [
   {
     prefix: APIEnum.AUTH,
@@ -14,7 +15,7 @@ const routers = [
   },
   {
     prefix: APIEnum.CONVERSATIONS,
-    router: conversationRouter,
+    router: userConversation,
   },
 ];
 
