@@ -70,14 +70,20 @@ module.exports.listen = (server) => {
     //client send file
     socket.on(SocketEvent.CLIENT_SEND_FILE, listeners.sendFile(io, socket));
 
-    socket.on(SocketEvent.ERROR, (error) => {
-      console.log(error);
-    });
-
     // get conversations
     socket.on(
       SocketEvent.CLIENT_GET_CONVERSATIONS,
       listeners.getConversations(io, socket)
     );
+
+    //client recall message
+    socket.on(
+      SocketEvent.CLIENT_RECALL_MESSAGE,
+      listeners.recallMessage(io, socket)
+    );
+    //error
+    socket.on(SocketEvent.ERROR, (error) => {
+      console.log(error);
+    });
   });
 };

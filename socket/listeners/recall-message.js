@@ -1,21 +1,21 @@
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
-const socketEvent = require("../constants/socket-event");
-const socketMsg = require("../constants/socket-msg");
+const SocketEvent = require("../constants/socket-event");
+const SocketMsg = require("../constants/socket-msg");
 
 module.exports = (io, socket) => async (req) => {
   try {
     const message = await Message.findById(req.messageId).populate("sender");
 
     if (!message) {
-      return socket.emit(socketEvent.ERROR, {
-        message: socketMsg.NOT_FOUND.replace(":{entity}", "message"),
+      return socket.emit(SocketEvent.ERROR, {
+        message: SocketMsg.NOT_FOUND.replace(":{entity}", "message"),
       });
     }
 
     if (message.sender._id !== socket.currentUser._id || message.deletedAt) {
-      return socket.emit(socketEvent.ERROR, {
-        message: socketMsg.FORBIDDEN,
+      return socket.emit(SocketEvent.ERROR, {
+        message: SocketMsg.FORBIDDEN,
       });
     }
 
@@ -23,7 +23,7 @@ module.exports = (io, socket) => async (req) => {
 
     if (message.conversation._id) {
       io.in(message.conversation._id.toString()).emit(
-        socketEvent.SV_SEND_MESSAGE,
+        SocketEvent.SV_SEND_MESSAGE,
         message
       );
     }
@@ -35,12 +35,12 @@ module.exports = (io, socket) => async (req) => {
 
       if (conversation) {
         io.in(conversation._id.toString()).emit(
-          socketEvent.SV_SEND_CONVERSATION,
+          SocketEvent.SV_SEND_CONVERSATION,
           conversation
         );
       }
     }
   } catch (error) {
-    socket.emit(socketEvent.ERROR, { message: error.message });
+    socket.emit(SocketEvent.ERROR, { message: error.message });
   }
 };
