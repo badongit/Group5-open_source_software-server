@@ -20,6 +20,10 @@ const MessageSchema = new Schema(
       type: String,
       trim: true,
     },
+    deletedText: {
+      type: String,
+      select: false,
+    },
     file: String,
     fileId: String,
     fileType: {
@@ -43,5 +47,14 @@ const MessageSchema = new Schema(
     timestamps: true,
   }
 );
+
+MessageSchema.methods.recall = async function () {
+  this.deletedText = this.text;
+  this.deletedAt = new Date();
+  this.file = "";
+  this.text = "Message has been revoked.";
+  await this.save();
+  return this;
+};
 
 module.exports = mongoose.model("messages", MessageSchema);

@@ -58,7 +58,7 @@ module.exports = (io, socket) => async (req) => {
       await session.commitTransaction();
 
       io.sockets.emit(SocketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
-        conversation: conversation._id,
+        conversationId: conversation._id,
         members,
       });
     } catch (error) {

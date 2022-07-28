@@ -4,6 +4,7 @@ const createConversation = require("./create-conversation");
 const sendMessage = require("./send-message");
 const sendFile = require("./send-file");
 const getConversations = require("./get-conversations");
+const recallMessage = require("./recall-message");
 
 module.exports = {
   disconnect,
@@ -12,4 +13,5 @@ module.exports = {
   sendMessage,
   sendFile,
   getConversations,
+  recallMessage,
 };
