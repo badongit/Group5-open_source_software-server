@@ -14,11 +14,7 @@ module.exports = (io, socket) => async (req) => {
       .populate({ path: "lastMessage" })
       .lean();
 
-    const rooms = conversations.map((conversation) =>
-      conversation._id.toString()
-    );
-    console.log("rooms", rooms);
-    console.log("conversations", conversations);
+    const rooms = conversations.map((conversation) => conversation.id);
     socket.join(rooms);
     socket.emit(SocketEvent.SV_SEND_CONVERSATIONS, { conversations });
   } catch (error) {

@@ -54,7 +54,6 @@ MessageSchema.methods.recall = async function () {
   this.file = "";
   this.text = "Message has been revoked.";
   await this.save();
-  return this;
 };
 
 module.exports = mongoose.model("messages", MessageSchema);

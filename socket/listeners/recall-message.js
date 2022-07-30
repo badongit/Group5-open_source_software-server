@@ -13,7 +13,7 @@ module.exports = (io, socket) => async (req) => {
       });
     }
 
-    if (message.sender._id !== socket.currentUser._id || message.deletedAt) {
+    if (message.sender.id !== socket.currentUser.id || message.deletedAt) {
       return socket.emit(SocketEvent.ERROR, {
         message: SocketMsg.FORBIDDEN,
       });
@@ -22,23 +22,21 @@ module.exports = (io, socket) => async (req) => {
     await message.recall();
 
     if (message.conversation._id) {
-      io.in(message.conversation._id.toString()).emit(
-        SocketEvent.SV_SEND_MESSAGE,
-        message
-      );
+      io.in(message.conversation.id).emit(SocketEvent.SV_SEND_MESSAGE, message);
     }
 
-    if (message._id === message.conversation.lastMessage) {
-      const conversation = await Conversation.findById(
-        message.conversation._id
-      ).populate(["members", "admin", "lastMessage"]);
+    const conversation = await Conversation.findById(
+      message.conversation._id
+    ).populate(["members", "admin", "lastMessage"]);
 
-      if (conversation) {
-        io.in(conversation._id.toString()).emit(
-          SocketEvent.SV_SEND_CONVERSATION,
-          conversation
-        );
-      }
+    if (
+      conversation &&
+      message._id.toString() === conversation.lastMessage.toString()
+    ) {
+      io.in(conversation.id).emit(
+        SocketEvent.SV_SEND_CONVERSATION,
+        conversation
+      );
     }
   } catch (error) {
     socket.emit(SocketEvent.ERROR, { message: error.message });

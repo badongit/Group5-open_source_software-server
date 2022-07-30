@@ -21,7 +21,7 @@ module.exports.listen = (server) => {
     try {
       // const { token } = socket.handshake.auth;
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1ODkzNDUwNywiZXhwIjoxNjU5MDIwOTA3fQ.UebCwnggveW-_xqKNOtbLtGEzJzglv09g7zmpB6NeTk";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1OTE3NjMyMywiZXhwIjoxNjU5MjYyNzIzfQ._ao5X27dLlydj--VrbqMumATxrjQn7NRFqnmvnSHtCU";
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 

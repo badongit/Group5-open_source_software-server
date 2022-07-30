@@ -189,13 +189,11 @@ module.exports = (io, socket) => async (req) => {
       ]);
 
       messageArr.forEach((message) => {
-        io.in(conversation._id.toString()).emit(
-          SocketEvent.SV_SEND_MESSAGE,
-          message
-        );
+        message.sender = sender;
+        io.in(conversation.id).emit(SocketEvent.SV_SEND_MESSAGE, message);
       });
 
-      io.in(conversation._id.toString()).emit(
+      io.in(conversation.id).emit(
         SocketEvent.SV_SEND_CONVERSATION,
         conversation
       );
