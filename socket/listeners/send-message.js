@@ -80,8 +80,8 @@ module.exports = (io, socket) => async (req) => {
             );
 
             messageEntities.push({
-              conversationId: newConversation._id,
-              sender,
+              conversation: newConversation._id,
+              sender: sender._id,
               subId,
               file: fileLink,
               fileId: response.data.id,
@@ -91,8 +91,8 @@ module.exports = (io, socket) => async (req) => {
 
           if (text) {
             messageEntities.push({
-              conversationId: newConversation._id,
-              sender,
+              conversation: newConversation._id,
+              sender: sender._id,
               text,
               subId,
             });
@@ -157,8 +157,8 @@ module.exports = (io, socket) => async (req) => {
         );
 
         messageEntities.push({
-          conversationId: newConversation._id,
-          sender,
+          conversation: conversation._id,
+          sender: sender._id,
           subId,
           file: fileLink,
           fileId: response.data.id,
@@ -168,8 +168,8 @@ module.exports = (io, socket) => async (req) => {
 
       if (text) {
         messageEntities.push({
-          conversationId: newConversation._id,
-          sender,
+          conversation: conversation._id,
+          sender: sender._id,
           text,
           subId,
         });
@@ -189,13 +189,11 @@ module.exports = (io, socket) => async (req) => {
       ]);
 
       messageArr.forEach((message) => {
-        io.in(conversation._id.toString()).emit(
-          SocketEvent.SV_SEND_MESSAGE,
-          message
-        );
+        message.sender = sender;
+        io.in(conversation.id).emit(SocketEvent.SV_SEND_MESSAGE, message);
       });
 
-      io.in(conversation._id.toString()).emit(
+      io.in(conversation.id).emit(
         SocketEvent.SV_SEND_CONVERSATION,
         conversation
       );

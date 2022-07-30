@@ -19,8 +19,9 @@ module.exports.listen = (server) => {
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      const { token } = socket.handshake.auth;
-
+      // const { token } = socket.handshake.auth;
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1OTE3NjMyMywiZXhwIjoxNjU5MjYyNzIzfQ._ao5X27dLlydj--VrbqMumATxrjQn7NRFqnmvnSHtCU";
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 
@@ -70,14 +71,20 @@ module.exports.listen = (server) => {
     //client send file
     socket.on(SocketEvent.CLIENT_SEND_FILE, listeners.sendFile(io, socket));
 
-    socket.on(SocketEvent.ERROR, (error) => {
-      console.log(error);
-    });
-
     // get conversations
     socket.on(
       SocketEvent.CLIENT_GET_CONVERSATIONS,
       listeners.getConversations(io, socket)
     );
+
+    //client recall message
+    socket.on(
+      SocketEvent.CLIENT_RECALL_MESSAGE,
+      listeners.recallMessage(io, socket)
+    );
+    //error
+    socket.on(SocketEvent.ERROR, (error) => {
+      console.log(error);
+    });
   });
 };
