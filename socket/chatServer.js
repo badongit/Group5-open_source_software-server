@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const ErrorResponse = require("../helpers/error-response");
 const statusCodeEnum = require("../enum/status-code.enum");
-const SocketMsg = require("./constants/socket-msg");
-const SocketEvent = require("./constants/socket-event");
+const socketMsg = require("./constants/socket-msg");
+const socketEvent = require("./constants/socket-event");
 const listeners = require("./listeners");
 
 module.exports.listen = (server) => {
@@ -19,22 +19,24 @@ module.exports.listen = (server) => {
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      // const { token } = socket.handshake.auth;
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyY2ZkMTA4MTA2OGEyYTBhNGI1NzUzYyIsImlhdCI6MTY1OTE3NjMyMywiZXhwIjoxNjU5MjYyNzIzfQ._ao5X27dLlydj--VrbqMumATxrjQn7NRFqnmvnSHtCU";
+      const { token } = socket.handshake.auth;
+      // const token = socket.handshake.headers.token;
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 
       if (!user) {
         return next(
           new ErrorResponse(
-            SocketMsg.NOT_FOUND.replace(":{entity}", "user"),
+            socketMsg.NOT_FOUND.replace(":{entity}", "user"),
             statusCodeEnum.NOT_FOUND
           )
         );
       }
+      user.isOnline = true;
+      await user.save();
 
       socket.currentUser = user;
+      io.sockets.emit(socketEvent.SV_SEND_USER, { user });
       next();
     } catch (error) {
       next(error);
@@ -42,7 +44,7 @@ module.exports.listen = (server) => {
   });
 
   //socket connect
-  io.on(SocketEvent.CONNECTION, async (socket) => {
+  io.on(socketEvent.CONNECTION, async (socket) => {
     try {
       const user = await User.findById(socket.currentUser?._id);
       user.isOnline = true;
@@ -51,39 +53,51 @@ module.exports.listen = (server) => {
       console.log(`Error connect socket: ${error.message}`);
     }
 
-    socket.on(SocketEvent.DISCONNECT, listeners.disconnect(io, socket));
+    socket.on(socketEvent.DISCONNECT, listeners.disconnect(io, socket));
 
     // join room
-    socket.on(SocketEvent.CLIENT_JOIN_ROOM, listeners.joinRoom(io, socket));
+    socket.on(socketEvent.CLIENT_JOIN_ROOM, listeners.joinRoom(io, socket));
 
     // create conversation
     socket.on(
-      SocketEvent.CLIENT_CREATE_CONVERSATION,
+      socketEvent.CLIENT_CREATE_CONVERSATION,
       listeners.createConversation(io, socket)
     );
 
     //client send message
     socket.on(
-      SocketEvent.CLIENT_SEND_MESSAGE,
+      socketEvent.CLIENT_SEND_MESSAGE,
       listeners.sendMessage(io, socket)
     );
 
     //client send file
-    socket.on(SocketEvent.CLIENT_SEND_FILE, listeners.sendFile(io, socket));
+    socket.on(socketEvent.CLIENT_SEND_FILE, listeners.sendFile(io, socket));
 
     // get conversations
     socket.on(
-      SocketEvent.CLIENT_GET_CONVERSATIONS,
+      socketEvent.CLIENT_GET_CONVERSATIONS,
       listeners.getConversations(io, socket)
     );
 
     //client recall message
     socket.on(
-      SocketEvent.CLIENT_RECALL_MESSAGE,
+      socketEvent.CLIENT_RECALL_MESSAGE,
       listeners.recallMessage(io, socket)
     );
+
+    //leave conversation
+    socket.on(
+      socketEvent.CLIENT_LEAVE_CONVERSATION,
+      listeners.leaveConversation(io, socket)
+    );
+
+    //disconnect room socket
+    socket.on(socketEvent.CLIENT_LEAVE_ROOM_SOCKET, (req) => {
+      socket.leave(req.conversationId);
+    });
+
     //error
-    socket.on(SocketEvent.ERROR, (error) => {
+    socket.on(socketEvent.ERROR, (error) => {
       console.log(error);
     });
   });

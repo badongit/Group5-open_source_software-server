@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
-const SocketEvent = require("../constants/socket-event");
+const socketEvent = require("../constants/socket-event");
 const socketMsg = require("../constants/socket-msg");
 const { toArrayUnique } = require("../../helpers/common");
 
@@ -12,7 +12,7 @@ module.exports = (io, socket) => async (req) => {
     const users = await User.find({ _id: { $in: members } });
 
     if (!title || !members) {
-      return socket.emit(SocketEvent.ERROR, {
+      return socket.emit(socketEvent.ERROR, {
         message: socketMsg.BAD_REQUEST,
       });
     }
@@ -21,7 +21,7 @@ module.exports = (io, socket) => async (req) => {
     members = toArrayUnique([...members, socket.currentUser._id]);
 
     if (members?.length < 3) {
-      return socket.emit(SocketEvent.ERROR, {
+      return socket.emit(socketEvent.ERROR, {
         message: socketMsg.BAD_REQUEST,
       });
     }
@@ -54,16 +54,16 @@ module.exports = (io, socket) => async (req) => {
       );
 
       conversation.lastMessage = message[0]._id;
-      await conversation.save();
+      await conversation.save({ session });
       await session.commitTransaction();
 
-      io.sockets.emit(SocketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
+      io.sockets.emit(socketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
         conversationId: conversation._id,
         members,
       });
     } catch (error) {
       await session.abortTransaction();
-      socket.emit(SocketEvent.ERROR, {
+      socket.emit(socketEvent.ERROR, {
         message: error.message,
       });
     } finally {
