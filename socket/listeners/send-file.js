@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
-const SocketMsg = require("../constants/socket-msg");
+const socketMsg = require("../constants/socket-msg");
 const fs = require("fs");
 
 module.exports = (io, socket) => async (req) => {
@@ -21,8 +21,8 @@ module.exports = (io, socket) => async (req) => {
     const session = await mongoose.startSession();
 
     if (!(receiver || conversationId)) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.NOT_FOUND.replace(":{entity}", "user"),
+      return socket.emit(socketEvent.ERROR, {
+        message: socketMsg.NOT_FOUND.replace(":{entity}", "user"),
       });
     }
 
@@ -66,14 +66,14 @@ module.exports = (io, socket) => async (req) => {
 
           await session.commitTransaction();
 
-          io.sockets.emit(SocketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
+          io.sockets.emit(socketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
             conversationId: newConversation._id,
             newMembers: newConversation.members,
           });
         } catch (error) {
           await session.abortTransaction();
 
-          socket.emit(SocketEvent.ERROR, {
+          socket.emit(socketEvent.ERROR, {
             message: error.message,
           });
         } finally {
@@ -91,14 +91,14 @@ module.exports = (io, socket) => async (req) => {
       const conversation = await Conversation.findById(conversationId);
 
       if (!conversation) {
-        return socket.emit(SocketEvent.ERROR, {
-          message: SocketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
+        return socket.emit(socketEvent.ERROR, {
+          message: socketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
         });
       }
 
       if (!conversation.members.includes(sender._id)) {
-        return socket.emit(SocketEvent.ERROR, {
-          message: SocketMsg.NOT_IN_CONVERSATION,
+        return socket.emit(socketEvent.ERROR, {
+          message: socketMsg.NOT_IN_CONVERSATION,
         });
       }
 
@@ -125,22 +125,25 @@ module.exports = (io, socket) => async (req) => {
         "lastMessage",
       ]);
 
-      io.in(conversation.id).emit(SocketEvent.SV_SEND_MESSAGE, message);
-      io.in(conversation.id).emit(
-        SocketEvent.SV_SEND_CONVERSATION,
+      io.in(conversation._id.toString()).emit(
+        socketEvent.SV_SEND_MESSAGE,
+        message
+      );
+      io.in(conversation._id.toString()).emit(
+        socketEvent.SV_SEND_CONVERSATION,
         conversation
       );
     } catch (error) {
       await session.abortTransaction();
 
-      socket.emit(SocketEvent.ERROR, {
+      socket.emit(socketEvent.ERROR, {
         message: error.message,
       });
     } finally {
       session.endSession();
     }
   } catch (error) {
-    socket.emit(SocketEvent.ERROR, {
+    socket.emit(socketEvent.ERROR, {
       message: error.message,
     });
   }

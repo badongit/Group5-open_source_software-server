@@ -1,5 +1,5 @@
 const Conversation = require("../../models/Conversation");
-const SocketEvent = require("../constants/socket-event");
+const socketEvent = require("../constants/socket-event");
 const socketMsg = require("../constants/socket-msg");
 
 module.exports = (io, socket) => async (req) => {
@@ -14,14 +14,13 @@ module.exports = (io, socket) => async (req) => {
       .lean();
 
     if (!conversation) {
-      return socket.emit(SocketEvent.ERROR, {
+      return socket.emit(socketEvent.ERROR, {
         message: socketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
       });
     }
 
-    console.log(`-------conversation:`, conversation);
     socket.join(req.conversationId);
-    socket.emit(SocketEvent.SV_SEND_CONVERSATION, { conversation });
+    socket.emit(socketEvent.SV_SEND_CONVERSATION, { conversation });
   } catch (error) {
     console.log(`Error socket: ${error.message}`);
   }

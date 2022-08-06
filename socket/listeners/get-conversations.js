@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
-const SocketEvent = require("../constants/socket-event");
+const socketEvent = require("../constants/socket-event");
 const socketMsg = require("../constants/socket-msg");
 
 module.exports = (io, socket) => async (req) => {
@@ -14,9 +14,11 @@ module.exports = (io, socket) => async (req) => {
       .populate({ path: "lastMessage" })
       .lean();
 
-    const rooms = conversations.map((conversation) => conversation.id);
+    const rooms = conversations.map((conversation) =>
+      conversation._id.toString()
+    );
     socket.join(rooms);
-    socket.emit(SocketEvent.SV_SEND_CONVERSATIONS, { conversations });
+    socket.emit(socketEvent.SV_SEND_CONVERSATIONS, { conversations });
   } catch (error) {
     console.log(`Error socket: ${error.message}`);
   }

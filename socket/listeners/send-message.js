@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
-const SocketMsg = require("../constants/socket-msg");
-const SocketEvent = require("../constants/socket-event");
+const socketMsg = require("../constants/socket-msg");
+const socketEvent = require("../constants/socket-event");
 const driveServices = require("../../googledrive/services");
 const {
   isDenyType,
@@ -20,28 +20,28 @@ module.exports = (io, socket) => async (req) => {
     const session = await mongoose.startSession();
 
     if (!(receiver || conversationId)) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.NOT_FOUND.replace(":{entity}", "user"),
+      return socket.emit(socketEvent.ERROR, {
+        message: socketMsg.NOT_FOUND.replace(":{entity}", "user"),
       });
     }
 
     //check missing info message
     if (!text && !file) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.BAD_REQUEST,
+      return socket.emit(socketEvent.ERROR, {
+        message: socketMsg.BAD_REQUEST,
       });
     }
 
     //check missing metadata if send file
     if (file && !(metadata?.name && metadata.type && subId)) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.BAD_REQUEST,
+      return socket.emit(socketEvent.ERROR, {
+        message: socketMsg.BAD_REQUEST,
       });
     }
 
     if (file && isDenyType(metadata.type)) {
-      return socket.emit(SocketEvent.ERROR, {
-        message: SocketMsg.BAD_REQUEST,
+      return socket.emit(socketEvent.ERROR, {
+        message: socketMsg.BAD_REQUEST,
       });
     }
 
@@ -107,14 +107,14 @@ module.exports = (io, socket) => async (req) => {
 
           await session.commitTransaction();
 
-          io.sockets.emit(SocketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
+          io.sockets.emit(socketEvent.SV_SEND_INVITATION_JOIN_ROOM, {
             conversationId: newConversation._id,
             newMembers: newConversation.members,
           });
         } catch (error) {
           await session.abortTransaction();
 
-          socket.emit(SocketEvent.ERROR, {
+          socket.emit(socketEvent.ERROR, {
             message: error.message,
           });
         } finally {
@@ -129,17 +129,19 @@ module.exports = (io, socket) => async (req) => {
 
     try {
       session.startTransaction();
-      const conversation = await Conversation.findById(conversationId);
+      const conversation = await Conversation.findById(conversationId).session(
+        session
+      );
 
       if (!conversation) {
-        return socket.emit(SocketEvent.ERROR, {
-          message: SocketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
+        return socket.emit(socketEvent.ERROR, {
+          message: socketMsg.NOT_FOUND.replace(":{entity}", "conversation"),
         });
       }
 
       if (!conversation.members.includes(sender._id)) {
-        return socket.emit(SocketEvent.ERROR, {
-          message: SocketMsg.NOT_IN_CONVERSATION,
+        return socket.emit(socketEvent.ERROR, {
+          message: socketMsg.NOT_IN_CONVERSATION,
         });
       }
 
@@ -190,24 +192,26 @@ module.exports = (io, socket) => async (req) => {
 
       messageArr.forEach((message) => {
         message.sender = sender;
-        io.in(conversation.id).emit(SocketEvent.SV_SEND_MESSAGE, message);
+        io.in(conversation._id.toString()).emit(socketEvent.SV_SEND_MESSAGE, {
+          message,
+        });
       });
 
-      io.in(conversation.id).emit(
-        SocketEvent.SV_SEND_CONVERSATION,
-        conversation
+      io.in(conversation._id.toString()).emit(
+        socketEvent.SV_SEND_CONVERSATION,
+        { conversation }
       );
     } catch (error) {
       await session.abortTransaction();
 
-      socket.emit(SocketEvent.ERROR, {
+      socket.emit(socketEvent.ERROR, {
         message: error.message,
       });
     } finally {
       await session.endSession();
     }
   } catch (error) {
-    socket.emit(SocketEvent.ERROR, {
+    socket.emit(socketEvent.ERROR, {
       message: error.message,
     });
   }
