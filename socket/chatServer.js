@@ -96,6 +96,12 @@ module.exports.listen = (server) => {
       socket.leave(req.conversationId);
     });
 
+    //add to conversation
+    socket.on(
+      socketEvent.CLIENT_ADD_TO_CONVERSATION,
+      listeners.addToConversation(io, socket)
+    );
+
     //error
     socket.on(socketEvent.ERROR, (error) => {
       console.log(error);
