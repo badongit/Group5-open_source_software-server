@@ -40,6 +40,18 @@ const UserSchema = new Schema(
       minlength: [2, "display name at least 2 characters"],
       maxlength: [30, "display name up to 30 characters"],
     },
+    gender: {
+      type: String,
+      enum: {
+        values: ["male", "female", "other"],
+        message: "gender {VALUE} is not supported",
+      },
+    },
+    dateOfBirth: Date,
+    address: {
+      type: String,
+      maxlength: [255, "address up to 255 characters"],
+    },
     avatarLink: {
       type: String,
       default:
