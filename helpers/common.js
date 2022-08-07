@@ -4,6 +4,15 @@ module.exports.toArrayUnique = (array) => {
   return [...newSet];
 };
 
+module.exports.mapById = (array) => {
+  const map = {};
+  array.forEach((item) => {
+    map[item._id.toString()] = item;
+  });
+
+  return map;
+};
+
 module.exports.isDenyType = (mimetype) => {
   return mimetype.startsWith("application/x-");
 };
