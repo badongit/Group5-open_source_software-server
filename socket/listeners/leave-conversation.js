@@ -4,7 +4,6 @@ const socketMsg = require("../constants/socket-msg");
 const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Message = require("../../models/Message");
-const socketEvent = require("../constants/socket-event");
 
 module.exports = (io, socket) => async (req) => {
   try {

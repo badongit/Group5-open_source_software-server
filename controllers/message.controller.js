@@ -31,7 +31,7 @@ module.exports = {
       return next(errorEnum.FORBIDDEN);
     }
 
-    const rawQuery = { ...req.query, conversationId };
+    const rawQuery = { ...req.query, conversation: conversationId };
 
     const { data: messages, pagination } = await getMany(Message, rawQuery, [
       "sender",
@@ -39,6 +39,8 @@ module.exports = {
 
     return res
       .status(statusCodeEnum.OK)
-      .json(new ResponseBuilder(messages).withPagination(pagination).build());
+      .json(
+        new ResponseBuilder({ messages }).withPagination(pagination).build()
+      );
   }),
 };
