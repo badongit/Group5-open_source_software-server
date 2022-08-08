@@ -7,6 +7,7 @@ const getConversations = require("./get-conversations");
 const recallMessage = require("./recall-message");
 const leaveConversation = require("./leave-conversation");
 const addToConversation = require("./add-to-conversation");
+const renameGroup = require("./rename-group");
 
 module.exports = {
   disconnect,
@@ -18,4 +19,5 @@ module.exports = {
   getConversations,
   recallMessage,
   leaveConversation,
+  renameGroup,
 };

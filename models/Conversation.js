@@ -4,7 +4,10 @@ const Schema = mongoose.Schema;
 
 const ConversationSchema = new Schema(
   {
-    title: String,
+    title: {
+      type: String,
+      maxlength: [100, "title up to 100 characters"],
+    },
     type: {
       type: String,
       required: [true, "type is required"],
