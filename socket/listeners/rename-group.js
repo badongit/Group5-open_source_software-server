@@ -42,6 +42,7 @@ module.exports = (io, socket) => async (req) => {
       conversation.title = title;
       conversation.lastMessage = message._id;
       await conversation.save({ session });
+      await session.commitTransaction();
 
       await conversation.populate(["members", "admin"]);
       conversation.lastMessage = message;
