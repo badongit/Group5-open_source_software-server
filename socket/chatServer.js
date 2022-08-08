@@ -102,6 +102,12 @@ module.exports.listen = (server) => {
       listeners.addToConversation(io, socket)
     );
 
+    //rename group
+    socket.on(
+      socketEvent.CLIENT_RENAME_GROUP,
+      listeners.renameGroup(io, socket)
+    );
+
     //error
     socket.on(socketEvent.ERROR, (error) => {
       console.log(error);
