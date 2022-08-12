@@ -10,6 +10,8 @@ module.exports = {
   CLIENT_RECALL_MESSAGE: "client-recall-message",
   CLIENT_ADD_TO_CONVERSATION: "client-add-to-conversation",
   CLIENT_RENAME_GROUP: "client-rename-group",
+  CLIENT_LEAVE_CONVERSATION: "client-leave-conversation",
+  CLIENT_LEAVE_ROOM_SOCKET: "client-leave-room-socket",
   SV_SEND_CONVERSATION: "server-send-conversation",
   SV_SEND_INVITATION_JOIN_ROOM: "server-send-invitation-join-room",
   SV_SEND_MESSAGE: "server-send-message",
