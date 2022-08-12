@@ -83,6 +83,8 @@ module.exports = (io, socket) => async (req) => {
       await conversation.save({ session });
       await session.commitTransaction();
 
+      await conversation.populate(["members", "admin", "lastMessage"]);
+
       io.in(conversation._id.toString()).emit(
         socketEvent.SV_SEND_USER_LEAVE_CONVERSATION,
         {
