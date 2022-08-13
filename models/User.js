@@ -48,10 +48,6 @@ const UserSchema = new Schema(
       },
     },
     dateOfBirth: Date,
-    address: {
-      type: String,
-      maxlength: [255, "address up to 255 characters"],
-    },
     avatarLink: {
       type: String,
       default:
