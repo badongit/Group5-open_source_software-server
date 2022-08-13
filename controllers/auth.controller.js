@@ -149,10 +149,9 @@ module.exports = {
 
   //@route [PUT] /auth/profile
   updateProfile: asyncHandle(async (req, res, next) => {
-    const { email, displayname } = req.body;
+    const {  dateOfBirth, gender, displayname} = req.body;
     const fieldsUpdate = {
-      email,
-      displayname,
+      dateOfBirth, gender, displayname
     };
 
     for (let key in fieldsUpdate) {
