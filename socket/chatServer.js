@@ -108,6 +108,9 @@ module.exports.listen = (server) => {
       listeners.renameGroup(io, socket)
     );
 
+    // call - video
+    socket.on(socketEvent.SV_CALL_VIDEO_USER, listeners.callVideo(io.socket));
+
     //error
     socket.on(socketEvent.ERROR, (error) => {
       console.log(error);

@@ -19,4 +19,5 @@ module.exports = {
   SV_SEND_CONVERSATIONS: "server-send-conversations",
   SV_SEND_USER_LEAVE_CONVERSATION: "server-send-user-leave-conversation",
   SV_SEND_USER: "server-send-user",
+  SV_CALL_VIDEO_USER: "server-call-video-user",
 };
