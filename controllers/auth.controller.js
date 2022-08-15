@@ -215,8 +215,8 @@ module.exports = {
     const resetPasswordToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: true });
 
-    const resetURL = `${process.env.CLIENT_URI}/reset-password/${resetPasswordToken}`;
-    const html = `<p>please click here ${resetURL} to update your password. 
+    const resetURL = `${process.env.CLIENT_URI}/auth/reset-password/${resetPasswordToken}`;
+    const html = `<p>please click here <a href="${resetURL}">${resetURL}</a> to update your password. 
     the link lasts in  ${+process.env.RESET_TOKEN_EXPIRE} minutes.</p>`;
 
     const options = {
