@@ -69,7 +69,7 @@ module.exports = (io, socket) => async (req) => {
           const messageEntities = [];
 
           if (file) {
-            const response = await driveServices.createFileInDrive(fileBuffer, {
+            const response = await driveServices.createFileInDrive(file, {
               type: metadata.type,
               name: subId + getExtensionFile(metadata.name),
               parents: process.env.DRIVE_MESSAGE_PARENTS,
@@ -148,7 +148,7 @@ module.exports = (io, socket) => async (req) => {
       const messageEntities = [];
 
       if (file) {
-        const response = await driveServices.createFileInDrive(fileBuffer, {
+        const response = await driveServices.createFileInDrive(file, {
           type: metadata.type,
           name: subId + getExtensionFile(metadata.name),
           parents: process.env.DRIVE_MESSAGE_PARENTS,
