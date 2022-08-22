@@ -8,6 +8,7 @@ const recallMessage = require("./recall-message");
 const leaveConversation = require("./leave-conversation");
 const addToConversation = require("./add-to-conversation");
 const renameGroup = require("./rename-group");
+const createMeeting = require("./create-meeting");
 
 module.exports = {
   disconnect,
@@ -20,4 +21,5 @@ module.exports = {
   recallMessage,
   leaveConversation,
   renameGroup,
+  createMeeting,
 };

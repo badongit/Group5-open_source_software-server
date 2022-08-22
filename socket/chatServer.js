@@ -6,6 +6,12 @@ const statusCodeEnum = require("../enum/status-code.enum");
 const socketMsg = require("./constants/socket-msg");
 const socketEvent = require("./constants/socket-event");
 const listeners = require("./listeners");
+const Meeting = require("../models/Meeting");
+const { CronJob } = require("cron");
+const dayjs = require("dayjs");
+const Message = require("../models/Message");
+const Conversation = require("../models/Conversation");
+// const cronSocket = require("../helpers/cron-socket");
 
 module.exports.listen = (server) => {
   const io = socketIO(server, {
@@ -16,11 +22,105 @@ module.exports.listen = (server) => {
     transports: ["websocket"],
   });
 
+  const cronSocket = new CronJob(
+    "0 * * * * *",
+    async function () {
+      console.log(io);
+      try {
+        const meetings = (
+          await Promise.all([
+            Meeting.find({
+              start: { $eq: dayjs().add(1, "day").second(0).millisecond(0) },
+            }),
+            Meeting.find({
+              start: { $eq: dayjs().add(1, "hour").second(0).millisecond(0) },
+            }),
+            Meeting.find({
+              start: {
+                $eq: dayjs().add(30, "minute").second(0).millisecond(0),
+              },
+            }),
+            Meeting.find({
+              start: { $eq: dayjs().add(5, "minute").second(0).millisecond(0) },
+            }),
+          ])
+        ).flat();
+
+        const meetingStart = await Meeting.find({
+          start: {
+            $eq: dayjs().second(0).millisecond(0),
+          },
+        });
+
+        await Promise.all(
+          meetings.map((meeting) => notificationMeeting(io, meeting, false))
+        );
+
+        await Promise.all(
+          meetingStart.map((meeting) => notificationMeeting(io, meeting, true))
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    null,
+    true,
+    "Asia/Ho_Chi_Minh"
+  );
+
+  async function notificationMeeting(io, meeting, isStarting) {
+    try {
+      const conversation = await Conversation.findById(meeting.conversation);
+
+      if (!conversation) {
+        throw new ErrorResponse(
+          socketMsg.NOT_FOUND.replace(":{entity}", "conversation")
+        );
+      }
+
+      const text = isStarting
+        ? socketMsg.MEETING_STARTING
+        : socketMsg.MEETING_START_AT.replace(
+            ":{time}",
+            dayjs(meeting.start).format("hh:mm A")
+          );
+      const message = (
+        await Message.create([
+          {
+            conversation: meeting.conversation,
+            text,
+            meeting: meeting._id,
+            type: "meeting",
+          },
+        ])
+      )[0];
+
+      conversation.lastMessage = message;
+      await conversation.save();
+      await conversation.populate(["members", "admin"]);
+      await message.populate("meeting");
+
+      io.in(conversation._id.toString()).emit(
+        socketEvent.SV_SEND_CONVERSATION,
+        {
+          conversation,
+        }
+      );
+      io.in(conversation._id.toString()).emit(socketEvent.SV_SEND_MESSAGE, {
+        message,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  cronSocket.start();
+
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      const { token } = socket.handshake.auth;
-      // const token = socket.handshake.headers.token;
+      // const { token } = socket.handshake.auth;
+      const token = socket.handshake.headers.token;
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 
@@ -106,6 +206,11 @@ module.exports.listen = (server) => {
     socket.on(
       socketEvent.CLIENT_RENAME_GROUP,
       listeners.renameGroup(io, socket)
+    );
+
+    socket.on(
+      socketEvent.CLIENT_CREATE_MEETING,
+      listeners.createMeeting(io, socket)
     );
 
     //error
