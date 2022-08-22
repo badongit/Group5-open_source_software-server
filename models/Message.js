@@ -33,10 +33,14 @@ const MessageSchema = new Schema(
         message: "file type {VALUE} is not supported",
       },
     },
+    meeting: {
+      type: Schema.Types.ObjectId,
+      ref: "meetings",
+    },
     type: {
       type: String,
       enum: {
-        values: ["user", "system"],
+        values: ["user", "system", "meeting"],
         message: "type {VALUE} is not supported",
       },
       default: "user",
