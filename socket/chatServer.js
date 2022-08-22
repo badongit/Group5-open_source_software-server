@@ -7,6 +7,8 @@ const socketMsg = require("./constants/socket-msg");
 const socketEvent = require("./constants/socket-event");
 const listeners = require("./listeners");
 
+const ltUsers = [];
+
 module.exports.listen = (server) => {
   const io = socketIO(server, {
     cors: {
@@ -108,8 +110,11 @@ module.exports.listen = (server) => {
       listeners.renameGroup(io, socket)
     );
 
-    // call - video
-    socket.on(socketEvent.SV_CALL_VIDEO_USER, listeners.callVideo(io.socket));
+    //
+    socket.on(
+      socketEvent.CLIENT_SEND_USER_ID,
+      listeners.getSocketId(io, socket)
+    );
 
     //error
     socket.on(socketEvent.ERROR, (error) => {
