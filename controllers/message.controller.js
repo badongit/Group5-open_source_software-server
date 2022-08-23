@@ -35,6 +35,7 @@ module.exports = {
 
     const { data: messages, pagination } = await getMany(Message, rawQuery, [
       "sender",
+      "meeting",
     ]);
 
     return res
