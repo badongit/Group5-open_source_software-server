@@ -17,8 +17,8 @@ module.exports = (io, socket) => async (req) => {
       });
     }
 
-    members = users.map((user) => user._id);
-    members = toArrayUnique([...members, socket.currentUser._id]);
+    members = users.map((user) => user._id.toString());
+    members = toArrayUnique([...members, socket.currentUser._id.toString()]);
 
     if (members?.length < 3 || members?.length > 31) {
       return socket.emit(socketEvent.ERROR, {
