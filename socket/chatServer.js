@@ -11,7 +11,6 @@ const { CronJob } = require("cron");
 const dayjs = require("dayjs");
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
-// const cronSocket = require("../helpers/cron-socket");
 
 module.exports.listen = (server) => {
   const io = socketIO(server, {
@@ -25,7 +24,6 @@ module.exports.listen = (server) => {
   const cronSocket = new CronJob(
     "0 * * * * *",
     async function () {
-      console.log(io);
       try {
         const meetings = (
           await Promise.all([
@@ -119,8 +117,8 @@ module.exports.listen = (server) => {
   //middleware auth
   io.use(async (socket, next) => {
     try {
-      // const { token } = socket.handshake.auth;
-      const token = socket.handshake.headers.token;
+      const { token } = socket.handshake.auth;
+      // const token = socket.handshake.headers.token;
       const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       const user = await User.findById(id);
 
