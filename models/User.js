@@ -67,6 +67,11 @@ const UserSchema = new Schema(
       select: false,
     },
     blocked: [{ type: Schema.Types.ObjectId, ref: "users" }],
+    rememberToken: {
+      type: String,
+      default: null
+    },
+    rememberExpiredAt: Date
   },
   {
     timestamps: true,

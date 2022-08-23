@@ -56,7 +56,7 @@ module.exports = {
 
   //@route [POST] /auth/login
   login: asyncHandle(async (req, res, next) => {
-    const { username, password } = req.body;
+    const { username, password, remember } = req.body;
 
     if (!username || !password) {
       return next(errorEnum.MISSING_DATA);
@@ -75,6 +75,23 @@ module.exports = {
       );
     }
 
+    let rememberToken = null;
+
+    if (remember) {
+      const now = new Date();
+      const expiredAt = now.getTime() + 1000 * 30 * 24 * 60 * 60;
+
+      rememberToken = crypto.randomBytes(15).toString("hex");
+
+      user.rememberToken = rememberToken;
+      user.rememberExpiredAt = expiredAt;
+
+      await user.save();
+    } else {
+      user.rememberToken = null;
+      await user.save();
+    }
+
     const accessToken = user.signAccessToken();
     const refreshToken = await user.signRefreshToken();
 
@@ -82,6 +99,44 @@ module.exports = {
       new ResponseBuilder({
         accessToken,
         refreshToken,
+        remember: {
+          token: rememberToken,
+          userId: user._id
+        }
+      }).build()
+    );
+  }),
+
+  //@route [POST] /auth/check-remember
+  checkRemember: asyncHandle(async (req, res, next) => {
+    const { token, userId } = req.body;
+
+    if (!token) {
+      return next(errorEnum.MISSING_DATA);
+    }
+
+    const user = await User.findOne({ _id: userId, rememberToken: token });
+    if (!user) {
+      return next(
+        new ErrorResponse(msgEnum.INCORRECT_INFO, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const today = (new Date()).getTime();
+    if (today > user.rememberExpiredAt) {
+      return next(
+        new ErrorResponse(msgEnum.REMEMBER_EXPIRED, statusCodeEnum.BAD_REQUEST)
+      );
+    }
+
+    const accessToken = user.signAccessToken();
+    const refreshToken = await user.signRefreshToken();
+
+    res.status(statusCodeEnum.OK).json(
+      new ResponseBuilder({
+        accessToken,
+        refreshToken,
+        user
       }).build()
     );
   }),

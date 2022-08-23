@@ -16,5 +16,6 @@ module.exports = {
   INVALID_TOKEN: "invalid token",
   CHECK_EMAIL: "check your email",
   NOT_MEMBER: "user is not a member",
-  INVALID_ROLE: "invalid role"
+  INVALID_ROLE: "invalid role",
+  REMEMBER_EXPIRED: "remember expired"
 };

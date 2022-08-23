@@ -10,6 +10,7 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
+  checkRemember
 } = require("../controllers/auth.controller");
 const {
   verifyRefreshToken,
@@ -21,6 +22,7 @@ router.post("/login", login);
 router.post("/new-token", verifyRefreshToken, newToken);
 router.post("/password/forgot", forgotPassword);
 router.post("/password/reset/:token", resetPassword);
+router.post("/check-remember", checkRemember);
 
 router.use(verifyAccessToken);
 router.put("/avatar", changeAvatar);
