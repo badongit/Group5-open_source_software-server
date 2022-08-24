@@ -43,6 +43,7 @@ module.exports = (io, socket) => async (req) => {
         }
       );
     }
+    console.log(usersPeer);
   } catch (error) {
     console.log(`Error socket: ${error.message}`);
   }
