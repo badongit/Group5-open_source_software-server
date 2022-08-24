@@ -12,6 +12,7 @@ module.exports = (io, socket) => async (req) => {
       .populate({ path: "members" })
       .populate({ path: "admin" })
       .populate({ path: "lastMessage" })
+      .sort("-updatedAt")
       .lean();
 
     const rooms = conversations.map((conversation) =>

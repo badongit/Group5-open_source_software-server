@@ -85,14 +85,6 @@ module.exports = (io, socket) => async (req) => {
 
       await conversation.populate(["members", "admin", "lastMessage"]);
 
-      io.in(conversation._id.toString()).emit(
-        socketEvent.SV_SEND_USER_LEAVE_CONVERSATION,
-        {
-          conversationId,
-          userId,
-        }
-      );
-
       if (message) {
         io.in(conversation._id.toString()).emit(socketEvent.SV_SEND_MESSAGE, {
           message,
@@ -102,6 +94,14 @@ module.exports = (io, socket) => async (req) => {
       io.in(conversation._id.toString()).emit(
         socketEvent.SV_SEND_CONVERSATION,
         { conversation }
+      );
+
+      io.in(conversation._id.toString()).emit(
+        socketEvent.SV_SEND_USER_LEAVE_CONVERSATION,
+        {
+          conversationId,
+          userId,
+        }
       );
     } catch (error) {
       await session.abortTransaction();
